@@ -4,6 +4,23 @@ export const asset = (path: string): string =>
 
 type Attrs = Record<string, string | number | boolean | undefined | null>;
 
+/**
+ * Attributes whose presence alone is the value. Everything else - `aria-*` in
+ * particular - must serialise `false` as the string "false" rather than vanish.
+ */
+const PRESENCE_ATTRS = new Set([
+  'checked',
+  'disabled',
+  'hidden',
+  'inert',
+  'multiple',
+  'novalidate',
+  'open',
+  'readonly',
+  'required',
+  'selected',
+]);
+
 /** Tiny `createElement` helper - keeps component code declarative without a framework. */
 export function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -13,12 +30,14 @@ export function el<K extends keyof HTMLElementTagNameMap>(
   const node = document.createElement(tag);
 
   for (const [key, value] of Object.entries(attrs)) {
-    if (value === undefined || value === null || value === false) continue;
+    if (value === undefined || value === null) continue;
     if (key === 'class') node.className = String(value);
-    else if (key === 'html') node.innerHTML = String(value);
+    // Only ever fed the hardcoded SVG strings in components/icons.ts.
+    else if (key === 'unsafeHTML') node.innerHTML = String(value);
     else if (key === 'text') node.textContent = String(value);
-    else if (key === 'dataset') continue;
-    else node.setAttribute(key, value === true ? '' : String(value));
+    else if (typeof value === 'boolean' && PRESENCE_ATTRS.has(key)) {
+      if (value) node.setAttribute(key, '');
+    } else node.setAttribute(key, String(value));
   }
 
   for (const child of children) {

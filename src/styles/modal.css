@@ -19,7 +19,7 @@
 .modal__panel {
   position: relative;
   width: min(760px, 100%);
-  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
   overflow-y: auto;
   border-radius: var(--r-xl);
   background: var(--surface-3);
@@ -125,8 +125,22 @@
   border-color: var(--purple);
 }
 
+.auth__form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
 .auth__field {
   margin-bottom: 14px;
+}
+
+.auth__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
 }
 
 .auth__input {
@@ -159,7 +173,13 @@
 .auth__row label {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   cursor: pointer;
+}
+
+.auth__row--divider {
+  justify-content: center;
+  margin: 16px 0 10px;
 }
 
 .auth__row {
@@ -188,10 +208,6 @@
 /* ---------- Bonus modal ---------- */
 .modal__panel.bonus-panel {
   width: min(460px, 100%);
-}
-
-.modal__panel.auth-panel {
-  width: min(760px, 100%);
 }
 
 .bonus {
@@ -305,7 +321,7 @@
 .bonus__disclaimer {
   font-size: 12px;
   line-height: 1.65;
-  color: #d6c9a9;
+  color: var(--text-warn);
   background: rgba(255, 194, 71, 0.07);
   border: 1px dashed rgba(255, 194, 71, 0.4);
   border-radius: var(--r-md);

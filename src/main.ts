@@ -1,8 +1,7 @@
 import './styles/index.css';
 
-import { el, qs } from './util/dom';
+import { asset, el, img, lockScroll, prefersReducedMotion, qs, unlockScroll } from './util/dom';
 import { categoryChips } from './data/navigation';
-import { asset, img } from './util/dom';
 import { cashbackStrip, missionsStrip } from './data/banners';
 import {
   allGames,
@@ -22,7 +21,8 @@ import { createPromoStrip } from './components/promoStrip';
 import { createFooter } from './components/footer';
 import { createGameDemo } from './game';
 
-const app = qs<HTMLDivElement>('#app')!;
+const app = qs<HTMLDivElement>('#app');
+if (!app) throw new Error('#app container is missing from index.html');
 
 /* ------------------------------------------------------------------ shell */
 
@@ -30,64 +30,98 @@ const shell = el('div', { class: 'shell' });
 
 const isCompact = (): boolean => window.matchMedia('(max-width: 1024px)').matches;
 
+const sidebar = createSidebar();
+
+const setDrawer = (open: boolean): void => {
+  shell.classList.toggle('is-drawer-open', open);
+  header.toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (open) lockScroll();
+  else unlockScroll();
+};
+
+let drawerOpen = false;
+const closeDrawer = (): void => {
+  if (!drawerOpen) return;
+  drawerOpen = false;
+  setDrawer(false);
+};
+
 const header = createHeader({
   onToggleSidebar: () => {
     // Wide screens collapse the rail; narrow screens slide a drawer in.
-    shell.classList.toggle(isCompact() ? 'is-drawer-open' : 'is-collapsed');
+    if (isCompact()) {
+      drawerOpen = !drawerOpen;
+      setDrawer(drawerOpen);
+      if (drawerOpen) sidebar.querySelector<HTMLButtonElement>('.nav-item')?.focus();
+      else header.toggle.focus();
+    } else {
+      shell.classList.toggle('is-collapsed');
+    }
   },
 });
 
-const sidebar = createSidebar();
 const scrim = el('div', { class: 'sidebar__scrim' });
-scrim.addEventListener('click', () => shell.classList.remove('is-drawer-open'));
+scrim.addEventListener('click', closeDrawer);
 
 window.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') shell.classList.remove('is-drawer-open');
+  if (event.key !== 'Escape' || !drawerOpen) return;
+  closeDrawer();
+  header.toggle.focus();
 });
 
 // Closing the drawer after a nav tap keeps mobile usable.
 sidebar.addEventListener('click', (event) => {
-  if (isCompact() && (event.target as HTMLElement).closest('.nav-item')) {
-    shell.classList.remove('is-drawer-open');
-  }
+  if (isCompact() && (event.target as HTMLElement).closest('.nav-item')) closeDrawer();
+});
+
+// Leaving the compact range must not strand either state on the shell.
+window.matchMedia('(max-width: 1024px)').addEventListener('change', (event) => {
+  if (event.matches) shell.classList.remove('is-collapsed');
+  else closeDrawer();
 });
 
 /* ----------------------------------------------------------------- chips */
 
+/* Filter toggles, not tabs: there are no tab panels, so `aria-pressed` is the
+   honest pattern. (In this layout reproduction they are visual only.) */
+const chipButtons = categoryChips.map((chip, index) =>
+  el(
+    'button',
+    {
+      class: `chip${index === 0 ? ' is-active' : ''}`,
+      type: 'button',
+      'aria-pressed': index === 0 ? 'true' : 'false',
+    },
+    [img(asset(chip.icon), '', { width: 18, height: 18 }), el('span', { text: chip.label })],
+  ),
+);
+
 const chips = el(
   'div',
-  { class: 'chips', role: 'tablist', 'aria-label': 'Game categories' },
-  categoryChips.map((chip, index) => {
-    const button = el(
-      'button',
-      {
-        class: `chip${index === 0 ? ' is-active' : ''}`,
-        type: 'button',
-        role: 'tab',
-        'aria-selected': index === 0 ? 'true' : 'false',
-      },
-      [img(asset(chip.icon), '', { width: 18, height: 18 }), el('span', { text: chip.label })],
-    );
-
-    button.addEventListener('click', () => {
-      chips.querySelectorAll('.chip').forEach((c) => {
-        c.classList.remove('is-active');
-        c.setAttribute('aria-selected', 'false');
-      });
-      button.classList.add('is-active');
-      button.setAttribute('aria-selected', 'true');
-    });
-
-    return button;
-  }),
+  { class: 'chips', role: 'group', 'aria-label': 'Game categories' },
+  chipButtons,
 );
+
+chipButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    chipButtons.forEach((c) => {
+      c.classList.remove('is-active');
+      c.setAttribute('aria-pressed', 'false');
+    });
+    button.classList.add('is-active');
+    button.setAttribute('aria-pressed', 'true');
+  });
+});
 
 /* ------------------------------------------------------------- demo entry */
 
 const demo = createGameDemo();
 
 const scrollToDemo = (): void => {
-  demo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  demo.scrollIntoView({
+    behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+    block: 'start',
+  });
 };
 
 /** Chicken Road 2 keeps its lobby tile, but the tile jumps to the live demo. */
@@ -99,8 +133,9 @@ const topGamesCards = topGames.map((game) =>
 
 /* ------------------------------------------------------------------ main */
 
-const main = el('main', { class: 'main', id: 'main' }, [
+const main = el('main', { class: 'main', id: 'main', tabindex: '-1' }, [
   el('div', { class: 'main__inner' }, [
+    el('h1', { class: 'sr-only', text: 'Wildies online casino and sportsbook - demo lobby' }),
     createHeroCarousel(),
     chips,
     createRail(topGamesCards, { title: 'Top Games', icon: 'sections/top.svg' }),
@@ -113,10 +148,9 @@ const main = el('main', { class: 'main', id: 'main' }, [
       title: 'Halloween Hits',
       icon: 'sections/halloween.svg',
     }),
-    createRail(providers.slice(0, 18).map(providerTile), {
+    createRail(providers.map(providerTile), {
       title: 'Providers',
       icon: 'sections/providers.svg',
-      modifier: 'rail--providers',
     }),
     createPromoStrip(cashbackStrip),
     createRail(newGamesGames.map((g) => gameCard(g)), {
@@ -134,19 +168,13 @@ const main = el('main', { class: 'main', id: 'main' }, [
       icon: 'sections/all.svg',
     }),
   ]),
-  createFooter(),
 ]);
 
-shell.append(header, sidebar, scrim, main);
+shell.append(header.element, sidebar, scrim, main, createFooter());
 app.append(shell);
 
 /* Placeholder links exist only to mirror the reference layout - keep them inert. */
 app.addEventListener('click', (event) => {
   const link = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href="#"]');
   if (link) event.preventDefault();
-});
-
-/* Section titles use Title Case in data but the reference renders them upper. */
-document.querySelectorAll<HTMLElement>('.section__title').forEach((node) => {
-  node.textContent = node.textContent?.toUpperCase() ?? '';
 });

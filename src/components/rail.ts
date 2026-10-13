@@ -1,4 +1,7 @@
-import { asset, el, img } from '../util/dom';
+import { asset, el, img, prefersReducedMotion } from '../util/dom';
+
+/** Must match --rail-gap in the stylesheet. */
+const RAIL_GAP = 14;
 import { icons } from './icons';
 import type { Game } from '../data/games';
 import type { Provider } from '../data/providers';
@@ -13,6 +16,20 @@ interface RailOptions {
   id?: string;
 }
 
+/* One resize listener for every rail on the page, batched into a single frame:
+   all reads happen together, then all writes. */
+const arrowSyncs = new Set<() => void>();
+let syncQueued = false;
+
+window.addEventListener('resize', () => {
+  if (syncQueued) return;
+  syncQueued = true;
+  requestAnimationFrame(() => {
+    syncQueued = false;
+    for (const sync of arrowSyncs) sync();
+  });
+});
+
 /** Section header + horizontally scrollable rail with arrow controls. */
 export function createRail(items: HTMLElement[], options: RailOptions): HTMLElement {
   const rail = el('div', { class: `rail ${options.modifier ?? 'rail--6'}` }, items);
@@ -21,17 +38,24 @@ export function createRail(items: HTMLElement[], options: RailOptions): HTMLElem
     class: 'icon-btn',
     type: 'button',
     'aria-label': `Scroll ${options.title} left`,
-    html: icons.chevronLeft,
+    unsafeHTML: icons.chevronLeft,
   });
   const next = el('button', {
     class: 'icon-btn',
     type: 'button',
     'aria-label': `Scroll ${options.title} right`,
-    html: icons.chevronRight,
+    unsafeHTML: icons.chevronRight,
   });
 
+  /** Page by whole columns so the scroll always lands on a snap point. */
   const page = (direction: 1 | -1): void => {
-    rail.scrollBy({ left: direction * Math.round(rail.clientWidth * 0.8), behavior: 'smooth' });
+    const first = rail.firstElementChild;
+    const step = first ? first.getBoundingClientRect().width + RAIL_GAP : rail.clientWidth * 0.8;
+    const columns = Math.max(1, Math.floor((rail.clientWidth + RAIL_GAP) / step) - 1);
+    rail.scrollBy({
+      left: direction * Math.round(step * columns),
+      behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+    });
   };
 
   prev.addEventListener('click', () => page(-1));
@@ -44,7 +68,7 @@ export function createRail(items: HTMLElement[], options: RailOptions): HTMLElem
   };
 
   rail.addEventListener('scroll', syncArrows, { passive: true });
-  window.addEventListener('resize', syncArrows);
+  arrowSyncs.add(syncArrows);
   requestAnimationFrame(syncArrows);
 
   return el('section', { class: 'section', id: options.id }, [
@@ -73,7 +97,7 @@ export function gameCard(game: Game, badge?: string, onClick?: () => void): HTML
     },
     [
       badge ? el('span', { class: 'game-card__badge', text: badge }) : null,
-      img(asset(game.thumb), `${game.name} - ${game.provider}`, { width: 198, height: 294 }),
+      img(asset(game.thumb), '', { width: 198, height: 294 }),
       el('span', { class: 'game-card__overlay' }, [
         el('span', { class: 'game-card__name', text: game.name }),
         el('span', { class: 'game-card__provider', text: game.provider }),
@@ -95,7 +119,8 @@ export function gameCard(game: Game, badge?: string, onClick?: () => void): HTML
 }
 
 export function providerTile(provider: Provider): HTMLElement {
-  return el('a', { class: 'provider-tile', href: '#', 'aria-label': provider.name }, [
+  // No aria-label: the visible logo alt plus the count form the accessible name.
+  return el('a', { class: 'provider-tile', href: '#' }, [
     img(asset(provider.logo), provider.name, { width: 120, height: 34 }),
     el('span', { text: `${provider.games} Games` }),
   ]);
@@ -103,7 +128,7 @@ export function providerTile(provider: Provider): HTMLElement {
 
 export function createSportsRail(): HTMLElement {
   const tiles = sportsTiles.map((tile) =>
-    el('a', { class: 'sports-tile', href: '#', 'aria-label': tile.name }, [
+    el('a', { class: 'sports-tile', href: '#' }, [
       img(asset(tile.icon), '', { width: 358, height: 496 }),
       el('span', { text: tile.name }),
     ]),

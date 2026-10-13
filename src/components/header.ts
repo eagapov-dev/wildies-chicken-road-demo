@@ -6,12 +6,20 @@ interface HeaderOptions {
   onToggleSidebar: () => void;
 }
 
-export function createHeader({ onToggleSidebar }: HeaderOptions): HTMLElement {
+export interface Header {
+  element: HTMLElement;
+  /** Exposed so the shell can keep `aria-expanded` in sync with the drawer. */
+  toggle: HTMLButtonElement;
+}
+
+export function createHeader({ onToggleSidebar }: HeaderOptions): Header {
   const toggle = el('button', {
     class: 'header__toggle',
     type: 'button',
-    'aria-label': 'Toggle navigation',
-    html: icons.collapse,
+    'aria-label': 'Navigation menu',
+    'aria-controls': 'sidebar',
+    'aria-expanded': 'false',
+    unsafeHTML: icons.collapse,
   });
   toggle.addEventListener('click', onToggleSidebar);
 
@@ -29,7 +37,7 @@ export function createHeader({ onToggleSidebar }: HeaderOptions): HTMLElement {
   ]);
 
   const search = el('div', { class: 'search' }, [
-    el('span', { class: 'search__icon', html: icons.search }),
+    el('span', { class: 'search__icon', unsafeHTML: icons.search }),
     el('input', {
       class: 'search__input',
       type: 'search',
@@ -43,10 +51,12 @@ export function createHeader({ onToggleSidebar }: HeaderOptions): HTMLElement {
   login.addEventListener('click', () => openAuthModal('login'));
   register.addEventListener('click', () => openAuthModal('signup'));
 
-  return el('header', { class: 'header' }, [
+  const element = el('header', { class: 'header' }, [
     brand,
     el('div', { class: 'header__spacer' }),
     search,
     el('div', { class: 'header__actions' }, [login, register]),
   ]);
+
+  return { element, toggle };
 }

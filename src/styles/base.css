@@ -6,6 +6,10 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Keep focused elements clear of the fixed header. */
+  scroll-padding-top: calc(var(--header-h) + 16px);
+  /* No layout shift when a modal locks the body. */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -67,7 +71,7 @@ p {
 :focus-visible {
   outline: 2px solid var(--purple-soft);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--r-xs);
 }
 
 .skip-link {
@@ -101,7 +105,7 @@ p {
 /* Thin scrollbars that match the dark shell */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3a3a46 transparent;
+  scrollbar-color: var(--scrollbar) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -114,12 +118,12 @@ p {
 }
 
 *::-webkit-scrollbar-thumb {
-  background: #3a3a46;
+  background: var(--scrollbar);
   border-radius: var(--r-pill);
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: #4b4b59;
+  background: var(--scrollbar-hover);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,18 +4,15 @@
    =========================================================== */
 
 @media (max-width: 1440px) {
-  .rail--6,
-  .rail--providers {
-    grid-auto-columns: calc((100% - 4 * 14px) / 5);
+  .rail--6 {
+    grid-auto-columns: calc((100% - 4 * var(--rail-gap)) / 5);
   }
 }
 
 @media (max-width: 1240px) {
-  .rail--6,
-  .rail--providers {
-    grid-auto-columns: calc((100% - 3 * 14px) / 4);
+  .rail--6 {
+    grid-auto-columns: calc((100% - 3 * var(--rail-gap)) / 4);
   }
-
 
   .demo__body {
     grid-template-columns: minmax(0, 1fr) 270px;
@@ -29,18 +26,17 @@
     padding-left: var(--gutter);
   }
 
-  .shell.is-collapsed .header__brand {
-    width: auto;
-  }
-
   .sidebar {
     width: 260px;
     transform: translateX(-100%);
+    /* Not just off-screen: a closed drawer must not be focusable or readable. */
+    visibility: hidden;
     box-shadow: 24px 0 60px rgba(0, 0, 0, 0.6);
+    transition: transform 0.25s var(--ease), visibility 0.25s var(--ease);
   }
 
-  .shell.is-collapsed .sidebar {
-    width: 260px;
+  .shell.is-drawer-open .sidebar {
+    visibility: visible;
   }
 
   /* On small screens the toggle opens the drawer instead of collapsing it. */
@@ -48,28 +44,7 @@
     transform: translateX(0);
   }
 
-  .shell.is-collapsed .nav-item__label,
-  .shell.is-collapsed .nav-item__caret,
-  .shell.is-collapsed .sidebar__foot .select__label,
-  .shell.is-collapsed .sidebar__foot .pill-row__label {
-    display: block;
-  }
-
-  .shell.is-collapsed .nav-item {
-    justify-content: flex-start;
-    padding-inline: 16px;
-  }
-
-  .shell.is-collapsed .sidebar__social {
-    flex-direction: row;
-  }
-
-  .shell.is-collapsed .social-btn {
-    width: 46px;
-  }
-
-  .main,
-  .shell.is-collapsed .main {
+  .main {
     padding-left: 0;
   }
 
@@ -90,22 +65,23 @@
     pointer-events: auto;
   }
 
+  /* Sidebar leaves the flow here, so step the rails up a column to stop the
+     cards growing as the viewport shrinks. */
+  .rail--6 {
+    grid-auto-columns: calc((100% - 4 * var(--rail-gap)) / 5);
+  }
+
+  /* 0.30 + 0.30 + 0.56 = 1.16: a deliberate ~16% peek on a narrow slide. */
   .hero-slide {
-    flex-basis: calc((100% - 2 * 14px) * 0.30);
+    flex-basis: calc((100% - 2 * var(--rail-gap)) * 0.3);
   }
 
   .hero-slide--wide {
-    flex-basis: calc((100% - 2 * 14px) * 0.62);
+    flex-basis: calc((100% - 2 * var(--rail-gap)) * 0.56);
   }
 }
 
 @media (max-width: 920px) {
-  .rail--6,
-  .rail--providers {
-    grid-auto-columns: calc((100% - 3 * 14px) / 4);
-  }
-
-
   /* Game: stage on top, controls underneath */
   .demo__body {
     grid-template-columns: minmax(0, 1fr);
@@ -122,7 +98,7 @@
 
   .stage {
     aspect-ratio: 4 / 3;
-    max-height: none;
+    min-height: 0;
   }
 
   .auth {
@@ -140,12 +116,10 @@
 }
 
 @media (max-width: 768px) {
+  /* Search is dropped below 768px: the header has no room for it next to the
+     brand and the two auth buttons. */
   .search {
     display: none;
-  }
-
-  .header__search-toggle {
-    display: grid;
   }
 
   .hero-slide,
@@ -170,12 +144,9 @@
     flex-basis: 22px;
   }
 
-  .rail--6,
-  .rail--providers {
-    grid-auto-columns: calc((100% - 3 * 10px) / 4);
-    gap: 10px;
+  .rail--6 {
+    grid-auto-columns: calc((100% - 3 * var(--rail-gap)) / 4);
   }
-
 
   .promo-strip {
     min-height: 150px;
@@ -254,9 +225,8 @@
 }
 
 @media (max-width: 680px) {
-  .rail--6,
-  .rail--providers {
-    grid-auto-columns: calc((100% - 2 * 10px) / 3);
+  .rail--6 {
+    grid-auto-columns: calc((100% - 2 * var(--rail-gap)) / 3);
   }
 }
 
@@ -290,11 +260,11 @@
     height: 22px;
   }
 
-  .rail--6,
-  .rail--providers {
-    grid-auto-columns: calc((100% - 10px) / 2.35);
+  /* 2.35 columns = two full cards plus a ~35% peek, which signals the rail
+     is swipeable without a visible scrollbar. */
+  .rail--6 {
+    grid-auto-columns: calc((100% - var(--rail-gap)) / 2.35);
   }
-
 
   .hero-slide,
   .hero-slide--wide {

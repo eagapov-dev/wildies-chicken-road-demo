@@ -32,14 +32,14 @@ strip under the game, and a block in the page footer. The page is also marked `n
 | Area | Choice | Why |
 |---|---|---|
 | Build | **Vite 8** | Fast dev server, zero-config static output. |
-| Language | **TypeScript** (strict) | Type safety for the game state machine without a framework runtime. |
+| Language | **TypeScript**, `strict` + `noUncheckedIndexedAccess` | Type safety for the game state machine without a framework runtime. |
 | UI | **Vanilla TS + a small `el()` DOM helper** | The page is content-driven markup; a framework would add weight without adding value. Components are plain functions returning `HTMLElement`. |
 | Styling | **Hand-written CSS**, custom properties, container queries | Design tokens are sampled from the reference site; container queries let the hero slides scale their own typography. |
 | Game | **Canvas 2D** + `requestAnimationFrame` | Smooth traffic, camera follow, hop animation and particles at 60 fps. |
 | Fonts | Montserrat (Google Fonts) | Same family as the reference. |
 
-No UI framework, no CSS framework, no runtime dependencies — the shipped bundle is **~53 kB JS /
-~29 kB CSS** (≈17 kB + 7 kB gzipped).
+No UI framework, no CSS framework, no runtime dependencies — the shipped bundle is **~55 kB JS /
+~31 kB CSS** (≈18 kB + 7 kB gzipped).
 
 ---
 
@@ -111,20 +111,51 @@ rules are readable and testable on their own, and the canvas layer is purely pre
 
 ---
 
-## Responsiveness & accessibility
+## Responsiveness
 
 * Desktop ≥1440px → 6 cards per rail; collapsible sidebar rail.
-* ≤1024px → the sidebar becomes an off-canvas drawer with a scrim; the burger toggles it.
+* ≤1024px → the sidebar becomes an off-canvas drawer with a scrim; the burger toggles it, and
+  the rails step **up** to 5 columns so cards do not grow as the viewport shrinks.
 * ≤920px → 4 cards per rail; the game switches to stage-on-top / controls-below.
-* ≤768px → 3 cards; one hero slide per view; search collapses.
-* ≤560px → ~2.4 cards; square game stage; single-column footer.
+* ≤768px → one hero slide per view; search collapses; the rail gap tightens to 10px.
+* ≤680px → 3 cards. ≤560px → ~2.4 cards, square game stage, single-column footer.
 
-Also: semantic landmarks, a skip link, visible focus rings, `aria-label`s on icon-only controls,
-focus-trapped modals with Escape-to-close and focus restore, `prefers-reduced-motion` support
-(carousel autoplay, hop animation and particles all respect it), and a `requestAnimationFrame`
-fallback so the game can never lock up if the visitor switches tabs mid-hop.
+Every column formula derives from a single `--rail-gap` token, so the gap and the arithmetic cannot
+drift apart. Verified at 360 / 430 / 600 / 768 / 1024 px with an automated check for horizontal
+overflow and off-viewport elements.
 
----
+## Accessibility
+
+What is implemented and verified in the source:
+
+* **Landmarks and headings** — `header` / `nav` / `main` / `contentinfo`, with an `sr-only` `<h1>`.
+* **Skip link** to a focusable `<main tabindex="-1">`.
+* **Keyboard play** — Space / → cross a lane, `C` cashes out. The transient lock between steps uses
+  `aria-disabled`, not the `disabled` attribute, because a disabled element is blurred by the
+  browser and keyboard play would break after the first move.
+* **Status announcements** — a persistent `role="status"` region in the stage announces each lane,
+  the multiplier, the cash-out value and the round result. The canvas itself is `aria-hidden`: it
+  is a picture of state that already exists as text.
+* **Modals** — focus trap (including the Shift+Tab edge case from the panel itself), Escape to
+  close, focus restore, scroll lock, and the page behind is `inert` + `aria-hidden`. The bonus
+  pop-up is an `alertdialog` labelled by its heading.
+* **Reduced motion** — respected by the CSS animations, the carousel autoplay, the hop, the
+  particles, JS smooth-scrolling, *and* the canvas loop (it paints one static frame instead of
+  running rAF).
+* **Contrast** — `--green` was darkened to `#0f8a52` (white on it: 4.6:1, was 2.76:1) and
+  `--text-faint` lightened to `#8e9196`; the dim/gold/green text tokens were checked against the
+  surfaces they actually appear on.
+* **Focus visibility** — one global `:focus-visible` ring, with no rule removing it without a
+  replacement.
+* **Forms** — real `<label>`s and correct `autocomplete` tokens in the auth modal; icon-only
+  controls carry `aria-label`s; the drawer toggle exposes `aria-expanded` / `aria-controls`.
+* Closed off-canvas drawer is `visibility: hidden`, so it leaves the tab order.
+
+**Known limitations** (stated rather than papered over): this has not been through a screen-reader
+session or an automated axe run, so it is not claimed as WCAG 2.2 AA conformant. The decorative
+lobby tiles are `<a href="#">` placeholders that go nowhere — faithful to the reference layout, but
+they add inert stops for keyboard and screen-reader users. The hero carousel pauses on hover, focus
+and reduced motion but has no explicit pause button.
 
 ## Asset attribution
 

@@ -72,8 +72,9 @@ export class ChickenRoadEngine {
     };
   }
 
+  /** Returns a snapshot - callers can hold it without observing later mutations. */
   getState(): Readonly<GameState> {
-    return this.state;
+    return { ...this.state };
   }
 
   subscribe(listener: Listener): () => void {
@@ -82,17 +83,18 @@ export class ChickenRoadEngine {
   }
 
   private emit(event: EngineEvent): void {
-    for (const listener of this.listeners) listener(event, this.state);
+    const snapshot = this.getState();
+    for (const listener of this.listeners) listener(event, snapshot);
   }
 
   /** Multiplier the chicken reaches after crossing `lane` lanes. */
   multiplierAt(lane: number): number {
     if (lane <= 0) return 1;
     const table = getDifficulty(this.state.difficulty).multipliers;
-    return table[Math.min(lane, table.length) - 1];
+    return table[Math.min(lane, table.length) - 1] ?? 1;
   }
 
-  get multipliers(): number[] {
+  get multipliers(): readonly number[] {
     return getDifficulty(this.state.difficulty).multipliers;
   }
 
@@ -153,7 +155,8 @@ export class ChickenRoadEngine {
 
   private settle(reachedEnd: boolean): void {
     const s = this.state;
-    const win = round2(s.bet * s.multiplier);
+    // Pay exactly what the Cash out button advertised - one source of truth.
+    const win = s.cashOutValue;
 
     s.balance = round2(s.balance + win);
     s.lastWin = win;

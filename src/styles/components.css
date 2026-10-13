@@ -18,9 +18,14 @@
   transform: translateY(1px);
 }
 
-.btn:disabled {
+.btn:disabled,
+.btn[aria-disabled='true'] {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.btn:disabled:active,
+.btn[aria-disabled='true']:active {
   transform: none;
 }
 
@@ -35,7 +40,7 @@
 
 .btn--primary {
   background: var(--green);
-  color: #fff;
+  color: var(--text-strong);
 }
 
 .btn--primary:hover:not(:disabled) {
@@ -44,7 +49,7 @@
 
 .btn--purple {
   background: var(--purple);
-  color: #fff;
+  color: var(--text-strong);
 }
 
 .btn--purple:hover:not(:disabled) {
@@ -109,6 +114,7 @@
   color: var(--text);
   font-size: 15px;
   font-weight: 500;
+  white-space: nowrap;
   transition: background 0.18s, border-color 0.18s;
 }
 
@@ -117,8 +123,11 @@
 }
 
 .chip.is-active {
-  background: transparent;
+  /* The reference marks the active chip with a border alone; the faint fill and
+     heavier label add a non-colour cue without changing the look much. */
+  background: rgba(113, 91, 255, 0.08);
   border-color: var(--purple-soft);
+  font-weight: 700;
 }
 
 .chip img {
@@ -140,7 +149,7 @@
 }
 
 .section__icon--thumb {
-  border-radius: 7px;
+  border-radius: var(--r-sm);
   object-fit: cover;
 }
 
@@ -192,7 +201,7 @@
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
-  gap: 14px;
+  gap: var(--rail-gap);
   overflow-x: auto;
   scroll-snap-type: x proximity;
   scroll-behavior: smooth;
@@ -205,11 +214,7 @@
 }
 
 .rail--6 {
-  grid-auto-columns: calc((100% - 5 * 14px) / 6);
-}
-
-.rail--providers {
-  grid-auto-columns: calc((100% - 5 * 14px) / 6);
+  grid-auto-columns: calc((100% - 5 * var(--rail-gap)) / 6);
 }
 
 /* ---------- Game card ---------- */
@@ -225,9 +230,11 @@
   transition: transform 0.22s var(--ease), box-shadow 0.22s var(--ease);
 }
 
-.game-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-card);
+@media (hover: hover) and (pointer: fine) {
+  .game-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card);
+  }
 }
 
 .game-card img {
@@ -277,7 +284,7 @@
   padding: 4px 9px;
   border-radius: var(--r-pill);
   background: var(--green);
-  color: #fff;
+  color: var(--text-strong);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -286,7 +293,7 @@
 }
 
 .game-card--demo {
-  box-shadow: 0 0 0 2px rgba(23, 178, 106, 0.55);
+  box-shadow: 0 0 0 2px rgba(23, 178, 106, 0.6);
 }
 
 /* ---------- Provider tile ---------- */
@@ -302,9 +309,11 @@
   transition: background 0.18s, transform 0.18s var(--ease);
 }
 
-.provider-tile:hover {
-  background: var(--surface-3);
-  transform: translateY(-3px);
+@media (hover: hover) and (pointer: fine) {
+  .provider-tile:hover {
+    background: var(--surface-3);
+    transform: translateY(-3px);
+  }
 }
 
 .provider-tile img {
@@ -331,9 +340,11 @@
   transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
 
-.sports-tile:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-card);
+@media (hover: hover) and (pointer: fine) {
+  .sports-tile:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card);
+  }
 }
 
 .sports-tile img {

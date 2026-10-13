@@ -16,6 +16,7 @@ export function createHeroCarousel(): HTMLElement {
       [
         img(asset(slide.image), '', {
           class: 'hero-slide__img',
+          'aria-hidden': 'true',
           loading: index < 2 ? 'eager' : 'lazy',
           fetchpriority: index === 0 ? 'high' : 'auto',
         }),
@@ -29,27 +30,31 @@ export function createHeroCarousel(): HTMLElement {
     ),
   );
 
-  const track = el('div', { class: 'hero__track', role: 'region', 'aria-label': 'Promotions' }, slides);
+  const track = el(
+    'div',
+    { class: 'hero__track', role: 'region', 'aria-label': 'Promotions', tabindex: '0' },
+    slides,
+  );
   const counter = el('span', { class: 'hero__count', text: `1/${slides.length}` });
 
   const prev = el('button', {
     class: 'icon-btn',
     type: 'button',
     'aria-label': 'Previous promotion',
-    html: icons.chevronLeft,
+    unsafeHTML: icons.chevronLeft,
   });
   const next = el('button', {
     class: 'icon-btn',
     type: 'button',
     'aria-label': 'Next promotion',
-    html: icons.chevronRight,
+    unsafeHTML: icons.chevronRight,
   });
 
   const activeIndex = (): number => {
     let best = 0;
     let bestDistance = Infinity;
     slides.forEach((slide, i) => {
-      const distance = Math.abs(slide.offsetLeft - track.scrollLeft);
+      const distance = Math.abs(slide.offsetLeft - track.offsetLeft - track.scrollLeft);
       if (distance < bestDistance) {
         bestDistance = distance;
         best = i;
@@ -60,7 +65,11 @@ export function createHeroCarousel(): HTMLElement {
 
   const goTo = (index: number): void => {
     const target = slides[(index + slides.length) % slides.length];
-    track.scrollTo({ left: target.offsetLeft, behavior: 'smooth' });
+    if (!target) return;
+    track.scrollTo({
+      left: target.offsetLeft - track.offsetLeft,
+      behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+    });
   };
 
   prev.addEventListener('click', () => goTo(activeIndex() - 1));

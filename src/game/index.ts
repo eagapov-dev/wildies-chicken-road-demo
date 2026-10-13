@@ -4,13 +4,15 @@ import { RoadScene } from './scene';
 import { openBonusModal } from './bonusModal';
 import {
   BET_STEP,
+  BONUS_DELAY_MS,
   CREDIT_LABEL,
   DIFFICULTIES,
   MAX_BET,
   MIN_BET,
   QUICK_BETS,
   ROUNDS_FOR_BONUS,
-  type DifficultyId,
+  SETTLE_DELAY_MS,
+  getDifficulty,
 } from './config';
 
 /**
@@ -21,10 +23,25 @@ export function createGameDemo(): HTMLElement {
   const engine = new ChickenRoadEngine('easy');
 
   // ------------------------------------------------------------------ stage
-  const canvas = el('canvas', { class: 'stage__canvas' }) as HTMLCanvasElement;
+  // The canvas is decorative for assistive tech: every meaningful value is
+  // mirrored as text in the panel and announced through `liveRegion`.
+  const canvas = el('canvas', { class: 'stage__canvas', 'aria-hidden': 'true' });
+
+  const liveRegion = el('p', {
+    class: 'sr-only',
+    role: 'status',
+    'aria-live': 'polite',
+    'aria-atomic': 'true',
+  });
 
   const multiplierPill = hudPill('Multiplier', '1.00x', 'hud-pill--mult');
   const winPill = hudPill('Cash out', `0.00 ${CREDIT_LABEL}`, 'hud-pill--win');
+
+  const coverStart = el('button', {
+    class: 'btn btn--primary',
+    type: 'button',
+    text: 'Start the demo',
+  });
 
   const cover = el('div', { class: 'stage__cover' }, [
     el('h3', { text: 'Chicken Road 2 – free demo' }),
@@ -33,20 +50,21 @@ export function createGameDemo(): HTMLElement {
         'Cross the lanes one at a time. Every step raises your multiplier – cash out whenever you like. ' +
         'Demo credits only: this simulation is configured to show winning outcomes and pays nothing real.',
     }),
-    el('button', { class: 'btn btn--primary', type: 'button', text: 'Start the demo' }),
+    coverStart,
   ]);
 
   const stage = el('div', { class: 'stage' }, [
     canvas,
-    el('div', { class: 'stage__watermark', text: 'DEMO' }),
+    el('div', { class: 'stage__watermark', text: 'DEMO', 'aria-hidden': 'true' }),
     el('div', { class: 'stage__hud' }, [multiplierPill.root, winPill.root]),
+    liveRegion,
     cover,
   ]);
 
   let toast: HTMLElement | null = null;
   const showToast = (text: string): void => {
     toast?.remove();
-    toast = el('div', { class: 'stage__toast', role: 'status', text });
+    toast = el('div', { class: 'stage__toast', 'aria-hidden': 'true', text });
     stage.append(toast);
   };
   const clearToast = (): void => {
@@ -67,22 +85,33 @@ export function createGameDemo(): HTMLElement {
     max: MAX_BET,
     step: BET_STEP,
     value: '10',
-    'aria-label': 'Bet in demo credits',
-  }) as HTMLInputElement;
+    'aria-label': 'Bet (demo credits), 1 to 100',
+  });
   const betMinus = el('button', { type: 'button', 'aria-label': 'Decrease bet', text: '−' });
   const betPlus = el('button', { type: 'button', 'aria-label': 'Increase bet', text: '+' });
   const stepper = el('div', { class: 'stepper' }, [betMinus, betInput, betPlus]);
 
+  const quickBetButtons = QUICK_BETS.map((value) =>
+    el('button', {
+      type: 'button',
+      text: String(value),
+      'data-bet': value,
+      'aria-label': `Bet ${value} demo credits`,
+    }),
+  );
   const quickBets = el(
     'div',
-    { class: 'quick-bets' },
-    QUICK_BETS.map((value) =>
-      el('button', { type: 'button', text: String(value), 'data-bet': value }),
-    ),
+    { class: 'quick-bets', role: 'group', 'aria-label': 'Quick bet' },
+    quickBetButtons,
   );
 
   const difficultyButtons = DIFFICULTIES.map((d) =>
-    el('button', { type: 'button', text: d.label, 'data-difficulty': d.id }),
+    el('button', {
+      type: 'button',
+      text: d.label,
+      'data-difficulty': d.id,
+      'aria-pressed': 'false',
+    }),
   );
   const difficulty = el('div', { class: 'difficulty', role: 'group', 'aria-label': 'Difficulty' }, difficultyButtons);
 
@@ -99,9 +128,10 @@ export function createGameDemo(): HTMLElement {
     { class: 'rounds-dots' },
     Array.from({ length: ROUNDS_FOR_BONUS }, () => el('i', {})),
   );
+  const roundsValue = el('b', { text: '0' });
   const statRounds = el('div', { class: 'stat' }, [
     el('span', { text: `Rounds · bonus at ${ROUNDS_FOR_BONUS}` }),
-    el('b', { text: '0' }),
+    roundsValue,
     roundsDots,
   ]);
 
@@ -174,6 +204,21 @@ export function createGameDemo(): HTMLElement {
   // ------------------------------------------------------------------- logic
   const scene = new RoadScene(canvas);
   let busy = false;
+  /** Deferred board cleanup after a round settles - cancelled if a new round starts. */
+  let settleTimer = 0;
+  let bonusTimer = 0;
+
+  /** Blocks a control without the focus loss the `disabled` attribute causes. */
+  const setBlocked = (button: HTMLButtonElement, blocked: boolean): void => {
+    button.setAttribute('aria-disabled', blocked ? 'true' : 'false');
+    button.classList.toggle('is-blocked', blocked);
+  };
+  const isBlocked = (button: HTMLButtonElement): boolean =>
+    button.getAttribute('aria-disabled') === 'true';
+
+  const announce = (message: string): void => {
+    liveRegion.textContent = message;
+  };
 
   scene.onHopEnd = () => {
     busy = false;
@@ -181,7 +226,7 @@ export function createGameDemo(): HTMLElement {
   };
 
   const syncTrack = (): void => {
-    scene.setTrack(engine.multipliers, DIFFICULTIES.find((d) => d.id === engine.getState().difficulty)!.traffic);
+    scene.setTrack(engine.multipliers, getDifficulty(engine.getState().difficulty).traffic);
   };
 
   function render(): void {
@@ -195,13 +240,15 @@ export function createGameDemo(): HTMLElement {
     statMultiplier.value.textContent = `${s.multiplier.toFixed(2)}x`;
     statWin.value.textContent = formatCredits(s.lastWin);
 
-    statRounds.querySelector('b')!.textContent = String(s.roundsCompleted);
+    roundsValue.textContent = String(s.roundsCompleted);
     roundsDots.querySelectorAll('i').forEach((dot, index) => {
       dot.classList.toggle('is-on', index < Math.min(s.roundsCompleted, ROUNDS_FOR_BONUS));
     });
 
     difficultyButtons.forEach((button) => {
-      button.classList.toggle('is-active', button.dataset.difficulty === s.difficulty);
+      const active = button.dataset.difficulty === s.difficulty;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
       button.disabled = s.phase === 'crossing';
     });
 
@@ -209,16 +256,18 @@ export function createGameDemo(): HTMLElement {
     betInput.disabled = locked;
     betMinus.disabled = locked || s.bet <= MIN_BET;
     betPlus.disabled = locked || s.bet >= MAX_BET || s.bet >= s.balance;
-    quickBets.querySelectorAll('button').forEach((b) => {
-      (b as HTMLButtonElement).disabled = locked;
+    quickBetButtons.forEach((b) => {
+      b.disabled = locked;
     });
 
+    // `aria-disabled` rather than the `disabled` attribute: the browser blurs a
+    // disabled element, which would drop keyboard focus on every single step.
     if (s.phase === 'crossing') {
       primary.className = 'btn btn--purple btn--block panel__cta';
       primary.textContent = s.lane === 0 ? 'Go – first lane' : `Go – lane ${s.lane + 1} of ${s.lanes}`;
-      primary.disabled = busy;
-      cashOut.hidden = false;
-      cashOut.disabled = busy || s.lane === 0;
+      setBlocked(primary, busy);
+      if (cashOut.hidden) cashOut.hidden = false;
+      setBlocked(cashOut, busy || s.lane === 0);
       cashOut.textContent =
         s.lane === 0
           ? 'Cash out – cross a lane first'
@@ -231,8 +280,12 @@ export function createGameDemo(): HTMLElement {
           : s.roundsCompleted === 0
             ? `Play – ${formatCredits(s.bet)} ${CREDIT_LABEL}`
             : `Play again – ${formatCredits(s.bet)} ${CREDIT_LABEL}`;
-      primary.disabled = busy || s.balance < s.bet;
-      cashOut.hidden = true;
+      setBlocked(primary, busy || s.balance < s.bet);
+      if (!cashOut.hidden) {
+        // Never hide a focused control out from under the keyboard.
+        if (document.activeElement === cashOut) primary.focus();
+        cashOut.hidden = true;
+      }
     }
 
     cover.hidden = !(s.phase === 'idle' && s.roundsCompleted === 0);
@@ -242,28 +295,42 @@ export function createGameDemo(): HTMLElement {
     if (event.type === 'step') {
       busy = true;
       scene.goToLane(event.lane);
+      announce(
+        `Lane ${event.lane} of ${s.lanes} crossed. Multiplier ${event.multiplier.toFixed(2)}. ` +
+          `Cash out ${formatCredits(s.cashOutValue)} ${CREDIT_LABEL}.`,
+      );
     }
 
     if (event.type === 'round-complete') {
-      scene.celebrate(event.reachedEnd);
+      // Burst at the lane the chicken is arriving at, not the one it left.
+      scene.celebrate(event.reachedEnd, s.lane);
+      announce(
+        `${event.reachedEnd ? 'Crossed every lane.' : 'Cashed out.'} Simulated win ` +
+          `${formatCredits(event.win)} ${CREDIT_LABEL} at ${event.multiplier.toFixed(2)}. ` +
+          `Demo balance ${formatCredits(s.balance)} ${CREDIT_LABEL}.`,
+      );
       showToast(
         event.reachedEnd
           ? `\u{1F3C1} Crossed every lane! Simulated win ${formatCredits(event.win)} ${CREDIT_LABEL} at ${event.multiplier.toFixed(2)}x`
           : `✅ Cashed out at ${event.multiplier.toFixed(2)}x – simulated win ${formatCredits(event.win)} ${CREDIT_LABEL}`,
       );
-      window.setTimeout(() => {
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        // A new round may already be underway - never clear a live board.
+        if (engine.getState().phase !== 'settled') return;
         engine.resetBoard();
         scene.reset();
-      }, 1500);
+      }, SETTLE_DELAY_MS);
     }
 
     if (event.type === 'bonus-due') {
-      window.setTimeout(() => {
+      window.clearTimeout(bonusTimer);
+      bonusTimer = window.setTimeout(() => {
         openBonusModal({
           rounds: s.roundsCompleted,
           onClaim: () => engine.claimBonus(),
         });
-      }, 1900);
+      }, BONUS_DELAY_MS);
     }
 
     render();
@@ -272,19 +339,29 @@ export function createGameDemo(): HTMLElement {
   // ----------------------------------------------------------------- wiring
   const start = (): void => {
     if (!engine.canStart()) return;
+    // Drop any pending cleanup from the previous round before rebuilding the board.
+    window.clearTimeout(settleTimer);
     clearToast();
     scene.reset();
     engine.startRound();
+    announce(
+      `Round started. Bet ${formatCredits(engine.getState().bet)} ${CREDIT_LABEL}. ` +
+        'Press Go to cross the first lane.',
+    );
   };
 
   primary.addEventListener('click', () => {
+    if (isBlocked(primary)) return;
     const s = engine.getState();
     if (s.phase === 'crossing') engine.step();
     else start();
   });
 
-  cover.querySelector('button')!.addEventListener('click', start);
-  cashOut.addEventListener('click', () => engine.cashOut());
+  coverStart.addEventListener('click', start);
+  cashOut.addEventListener('click', () => {
+    if (isBlocked(cashOut)) return;
+    engine.cashOut();
+  });
 
   betMinus.addEventListener('click', () => engine.setBet(engine.getState().bet - BET_STEP));
   betPlus.addEventListener('click', () => engine.setBet(engine.getState().bet + BET_STEP));
@@ -298,7 +375,12 @@ export function createGameDemo(): HTMLElement {
   difficulty.addEventListener('click', (event) => {
     const target = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-difficulty]');
     if (!target) return;
-    engine.setDifficulty(target.dataset.difficulty as DifficultyId);
+    const next = DIFFICULTIES.find((d) => d.id === target.dataset.difficulty);
+    // Re-clicking the active chip must not tear down a board mid-settle.
+    if (!next || next.id === engine.getState().difficulty) return;
+    window.clearTimeout(settleTimer);
+    clearToast();
+    engine.setDifficulty(next.id);
     syncTrack();
   });
 
@@ -316,7 +398,8 @@ export function createGameDemo(): HTMLElement {
     if ((event.key === ' ' || event.key === 'ArrowRight') && s.phase === 'crossing' && !busy) {
       event.preventDefault();
       engine.step();
-    } else if ((event.key === 'c' || event.key === 'C') && s.phase === 'crossing' && s.lane > 0) {
+    } else if ((event.key === 'c' || event.key === 'C') && s.phase === 'crossing' && s.lane > 0 && !busy) {
+      event.preventDefault();
       engine.cashOut();
     }
   });
@@ -341,6 +424,16 @@ export function createGameDemo(): HTMLElement {
   visibility.observe(stage);
 
   requestAnimationFrame(() => scene.resize());
+
+  /** Releases every global resource this block acquired. */
+  const destroy = (): void => {
+    window.clearTimeout(settleTimer);
+    window.clearTimeout(bonusTimer);
+    resizeObserver.disconnect();
+    visibility.disconnect();
+    scene.destroy();
+  };
+  window.addEventListener('pagehide', destroy, { once: true });
 
   if (import.meta.env.DEV) {
     // Handy for manual QA in the browser console.

@@ -17,7 +17,7 @@ export function createSidebar(): HTMLElement {
         [
           img(asset(item.icon), '', { class: 'nav-item__icon', width: 20, height: 20 }),
           el('span', { class: 'nav-item__label', text: item.label }),
-          item.expandable ? el('span', { class: 'nav-item__caret', html: icons.caretDown }) : null,
+          item.expandable ? el('span', { class: 'nav-item__caret', unsafeHTML: icons.caretDown }) : null,
         ],
       );
 
@@ -36,12 +36,12 @@ export function createSidebar(): HTMLElement {
 
   const foot = el('div', { class: 'sidebar__foot' }, [
     el('button', { class: 'sidebar__chip', type: 'button' }, [
-      el('span', { html: icons.globe }),
+      el('span', { unsafeHTML: icons.globe }),
       el('span', { class: 'select__label', text: 'English' }),
-      el('span', { class: 'caret', html: icons.caretDown }),
+      el('span', { class: 'caret', unsafeHTML: icons.caretDown }),
     ]),
     el('button', { class: 'sidebar__chip', type: 'button' }, [
-      el('span', { html: icons.chat }),
+      el('span', { unsafeHTML: icons.chat }),
       el('span', { class: 'select__label', text: 'Support' }),
     ]),
     el(

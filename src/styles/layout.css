@@ -16,6 +16,10 @@
   padding-right: var(--gutter);
 }
 
+.header__logo-link {
+  flex: 0 0 auto;
+}
+
 .header__brand {
   display: flex;
   align-items: center;
@@ -28,12 +32,7 @@
 }
 
 .header__logo-link {
-  min-width: 0;
   display: flex;
-}
-
-.shell.is-collapsed .header__brand {
-  width: var(--sidebar-w-collapsed);
 }
 
 .header__toggle {
@@ -121,10 +120,6 @@
   transition: width 0.25s var(--ease), transform 0.25s var(--ease);
 }
 
-.shell.is-collapsed .sidebar {
-  width: var(--sidebar-w-collapsed);
-}
-
 .sidebar__nav {
   padding: 4px 0;
 }
@@ -181,18 +176,6 @@
   transition: transform 0.2s;
 }
 
-.shell.is-collapsed .nav-item__label,
-.shell.is-collapsed .nav-item__caret,
-.shell.is-collapsed .sidebar__foot .select__label,
-.shell.is-collapsed .sidebar__foot .pill-row__label {
-  display: none;
-}
-
-.shell.is-collapsed .nav-item {
-  justify-content: center;
-  padding-inline: 0;
-}
-
 .sidebar__divider {
   height: 1px;
   background: var(--line);
@@ -243,14 +226,6 @@
   transition: background 0.18s;
 }
 
-.shell.is-collapsed .social-btn {
-  width: 100%;
-}
-
-.shell.is-collapsed .sidebar__social {
-  flex-direction: column;
-}
-
 .social-btn:hover {
   background: var(--surface-3);
 }
@@ -266,16 +241,47 @@
   padding-top: var(--header-h);
   padding-left: var(--sidebar-w);
   transition: padding-left 0.25s var(--ease);
-  min-width: 0;
-}
-
-.shell.is-collapsed .main {
-  padding-left: var(--sidebar-w-collapsed);
 }
 
 .main__inner {
   padding: 16px var(--gutter) 0;
   max-width: 1680px;
+  margin-inline: auto;
+}
+
+/* The collapsed rail is a desktop-only affordance: below 1024px the same
+   button opens the drawer instead, so this state must not apply at all. */
+@media (min-width: 1025px) {
+  .shell.is-collapsed .header__brand {
+    width: var(--sidebar-w-collapsed);
+  }
+
+  .shell.is-collapsed .sidebar {
+    width: var(--sidebar-w-collapsed);
+  }
+
+  .shell.is-collapsed .nav-item__label,
+  .shell.is-collapsed .nav-item__caret,
+  .shell.is-collapsed .sidebar__foot .select__label {
+    display: none;
+  }
+
+  .shell.is-collapsed .nav-item {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .shell.is-collapsed .social-btn {
+    width: 100%;
+  }
+
+  .shell.is-collapsed .sidebar__social {
+    flex-direction: column;
+  }
+
+  .shell.is-collapsed .main {
+    padding-left: var(--sidebar-w-collapsed);
+  }
 }
 
 .sidebar__scrim {

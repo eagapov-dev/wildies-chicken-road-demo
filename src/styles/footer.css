@@ -1,12 +1,13 @@
 .footer {
   margin-top: 40px;
   border-top: 1px solid var(--line);
-  background: #0c0e10;
+  background: var(--bg-deep);
 }
 
 .footer__inner {
   padding: 28px var(--gutter) 40px;
   max-width: 1680px;
+  margin-inline: auto;
 }
 
 .logo-strip {
@@ -133,7 +134,7 @@
   border: 1px dashed rgba(255, 194, 71, 0.4);
   border-radius: var(--r-md);
   background: rgba(255, 194, 71, 0.06);
-  color: #d6c9a9;
+  color: var(--text-warn);
   font-size: 12.5px;
   line-height: 1.6;
 }

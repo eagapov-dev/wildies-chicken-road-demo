@@ -49,8 +49,8 @@ export function openBonusModal({ rounds, onClaim }: BonusOptions): void {
   const content = el('div', { class: 'bonus' }, [
     el('div', { class: 'bonus__hero' }, [
       el('div', { class: 'bonus__rays' }),
-      el('div', { class: 'bonus__coin', text: '\u{1F389}' }),
-      el('h2', { class: 'bonus__title', text: "You've won a bonus" }),
+      el('div', { class: 'bonus__coin', text: '\u{1F389}', 'aria-hidden': 'true' }),
+      el('h2', { class: 'bonus__title', id: 'bonus-title', text: "You've won a bonus" }),
       el('p', {
         class: 'bonus__sub',
         text: `${rounds} of ${ROUNDS_FOR_BONUS} demo rounds completed - here is your simulated reward.`,
@@ -62,6 +62,8 @@ export function openBonusModal({ rounds, onClaim }: BonusOptions): void {
 
   const modal = openModal(content, {
     label: "You've won a bonus",
+    labelledBy: 'bonus-title',
+    role: 'alertdialog',
     panelClass: 'bonus-panel',
     dismissOnBackdrop: false,
   });

@@ -6,8 +6,8 @@ interface Car {
   speed: number;
   dir: 1 | -1;
   length: number;
-  hue: string;
-  accent: string;
+  body: string;
+  trim: string;
 }
 
 interface Particle {
@@ -29,7 +29,11 @@ interface Hop {
   duration: number;
 }
 
-const CAR_COLORS: Array<[string, string]> = [
+type CarPaint = readonly [body: string, trim: string];
+
+const DEFAULT_CAR_PAINT: CarPaint = ['#dfe3ea', '#ffffff'];
+
+const CAR_COLORS: readonly CarPaint[] = [
   ['#e2574c', '#f4857c'],
   ['#3f8ce0', '#79b4f0'],
   ['#f0b429', '#ffd166'],
@@ -57,7 +61,7 @@ export class RoadScene {
   private height = 0;
   private dpr = 1;
 
-  private multipliers: number[] = [];
+  private multipliers: readonly number[] = [];
   private cars: Car[] = [];
   private spawnTimers: number[] = [];
   private particles: Particle[] = [];
@@ -71,10 +75,19 @@ export class RoadScene {
   private laneWidth = 120;
   private trafficDensity = 1;
   private finished = false;
-  private celebration = 0;
   private hopGuard = 0;
 
   onHopEnd: (() => void) | null = null;
+
+  /** Lane the chicken is logically on (0 = start kerb). */
+  get currentLane(): number {
+    return this.lane;
+  }
+
+  /** With reduced motion the rAF loop never runs, so repaint on state changes. */
+  private redrawIfStatic(): void {
+    if (!this.raf && this.width > 0) this.draw();
+  }
 
   private canvas: HTMLCanvasElement;
 
@@ -90,6 +103,11 @@ export class RoadScene {
 
   start(): void {
     if (this.raf) return;
+    if (prefersReducedMotion()) {
+      // Honour the OS setting: draw the board once, no continuous animation.
+      this.draw();
+      return;
+    }
     this.lastTime = performance.now();
     const loop = (now: number): void => {
       const dt = Math.min(0.05, (now - this.lastTime) / 1000);
@@ -121,26 +139,28 @@ export class RoadScene {
     this.canvas.height = Math.round(rect.height * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     this.laneWidth = clamp(this.width / 3.6, 92, 168);
+    this.redrawIfStatic();
   }
 
   // ------------------------------------------------------------------ control
 
-  setTrack(multipliers: number[], traffic: number): void {
+  setTrack(multipliers: readonly number[], traffic: number): void {
     this.multipliers = multipliers;
     this.trafficDensity = traffic;
     this.spawnTimers = multipliers.map(() => Math.random() * 0.8);
     this.cars = [];
-    this.reset();
+    this.reset();  this.redrawIfStatic();
   }
 
   reset(): void {
-    window.clearTimeout(this.hopGuard);
+    // Resolve rather than drop: callers gate input on the hop-end callback, so
+    // silently abandoning a hop would strand the UI in its "busy" state.
+    this.finishHop();
     this.lane = 0;
     this.displayLane = 0;
-    this.hop = null;
     this.finished = false;
-    this.celebration = 0;
     this.particles = [];
+    this.redrawIfStatic();
   }
 
   /** Move the chicken to `lane`, animating the hop. */
@@ -149,6 +169,7 @@ export class RoadScene {
     this.lane = lane;
     this.hop = { from, to: lane, t: 0, duration: prefersReducedMotion() ? 0.01 : HOP_DURATION };
     this.spawnBurst(this.laneCenterX(lane), this.chickenY(), 'spark', 8);
+    this.redrawIfStatic();
 
     // requestAnimationFrame is suspended in background tabs, so guarantee the
     // hop resolves even if the visitor switches away mid-step.
@@ -162,15 +183,17 @@ export class RoadScene {
     if (!this.hop) return;
     this.displayLane = this.hop.to;
     this.hop = null;
+    this.redrawIfStatic();
     this.onHopEnd?.();
   }
 
-  celebrate(reachedEnd: boolean): void {
+  /** `lane` is passed in because `displayLane` may still be mid-hop. */
+  celebrate(reachedEnd: boolean, lane: number = this.displayLane): void {
     this.finished = true;
-    this.celebration = 1;
-    const x = this.laneCenterX(this.displayLane);
+    const x = this.laneCenterX(lane);
     this.spawnBurst(x, this.chickenY() - 14, 'coin', reachedEnd ? 34 : 22);
     this.spawnBurst(x, this.chickenY() - 6, 'feather', 10);
+    this.redrawIfStatic();
   }
 
   // ------------------------------------------------------------------ geometry
@@ -240,7 +263,6 @@ export class RoadScene {
     this.updateTraffic(dt);
     this.updateParticles(dt);
 
-    if (this.celebration > 0) this.celebration = Math.max(0, this.celebration - dt * 0.5);
   }
 
   /**
@@ -251,46 +273,54 @@ export class RoadScene {
     const activeFrom = Math.floor(this.displayLane);
     const activeTo = Math.ceil(this.displayLane);
     const entering = this.hop ? this.hop.to : this.lane;
-    const blocked = new Set([activeFrom, activeTo, entering]);
+    const isBlocked = (lane: number): boolean =>
+      lane === activeFrom || lane === activeTo || lane === entering;
+    const cap = this.trafficDensity + 2;
 
     for (let i = 0; i < this.multipliers.length; i += 1) {
       const laneNumber = i + 1;
-      this.spawnTimers[i] -= dt;
-      const carsHere = this.cars.filter((c) => c.lane === laneNumber).length;
-      const cap = this.trafficDensity + 2;
+      const timer = (this.spawnTimers[i] ?? 0) - dt;
+      this.spawnTimers[i] = timer;
+      if (timer > 0) continue;
 
-      if (this.spawnTimers[i] <= 0) {
-        this.spawnTimers[i] = 0.7 + Math.random() * (1.9 / this.trafficDensity);
-        if (!blocked.has(laneNumber) && carsHere < cap) {
-          const dir: 1 | -1 = laneNumber % 2 === 0 ? -1 : 1;
-          const [hue, accent] = CAR_COLORS[Math.floor(Math.random() * CAR_COLORS.length)];
-          this.cars.push({
-            lane: laneNumber,
-            dir,
-            y: dir === 1 ? this.roadTop - 80 : this.roadBottom + 80,
-            speed: 170 + Math.random() * 180,
-            length: 74 + Math.random() * 26,
-            hue,
-            accent,
-          });
-        }
-      }
+      this.spawnTimers[i] = 0.7 + Math.random() * (1.9 / this.trafficDensity);
+      if (isBlocked(laneNumber)) continue;
+
+      let carsHere = 0;
+      for (const car of this.cars) if (car.lane === laneNumber) carsHere += 1;
+      if (carsHere >= cap) continue;
+
+      const dir: 1 | -1 = laneNumber % 2 === 0 ? -1 : 1;
+      const [body, trim] =
+        CAR_COLORS[Math.floor(Math.random() * CAR_COLORS.length)] ?? DEFAULT_CAR_PAINT;
+      this.cars.push({
+        lane: laneNumber,
+        dir,
+        y: dir === 1 ? this.roadTop - 80 : this.roadBottom + 80,
+        speed: 170 + Math.random() * 180,
+        length: 74 + Math.random() * 26,
+        body,
+        trim,
+      });
     }
 
     const dangerTop = this.chickenY() - 70;
     const dangerBottom = this.chickenY() + 70;
 
-    this.cars = this.cars.filter((car) => {
-      // Cars in a blocked lane hurry out of the way - reads as a near miss.
-      const rushing = blocked.has(car.lane);
+    // Move, then compact in place - no per-frame array allocation, and no
+    // mutation hidden inside a filter predicate.
+    let kept = 0;
+    for (const car of this.cars) {
       const inDanger = car.y > dangerTop - car.length && car.y < dangerBottom + car.length;
-      const speed = rushing && inDanger ? car.speed * 3.1 : car.speed;
+      // Cars in a blocked lane hurry out of the way - reads as a near miss.
+      const speed = isBlocked(car.lane) && inDanger ? car.speed * 3.1 : car.speed;
       car.y += speed * car.dir * dt;
 
-      return car.dir === 1
-        ? car.y < this.roadBottom + 140
-        : car.y > this.roadTop - 140;
-    });
+      const onScreen =
+        car.dir === 1 ? car.y < this.roadBottom + 140 : car.y > this.roadTop - 140;
+      if (onScreen) this.cars[kept++] = car;
+    }
+    this.cars.length = kept;
   }
 
   private updateParticles(dt: number): void {
@@ -512,7 +542,7 @@ export class RoadScene {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = isDone ? '#7ff0b6' : isNext ? '#ffd071' : 'rgba(255,255,255,0.4)';
-      ctx.fillText(`${this.multipliers[i].toFixed(2)}x`, 0, 1);
+      ctx.fillText(`${(this.multipliers[i] ?? 1).toFixed(2)}x`, 0, 1);
       ctx.restore();
 
       // Sign post
@@ -536,7 +566,6 @@ export class RoadScene {
       const x = this.laneCenterX(car.lane);
       const w = Math.min(this.laneWidth * 0.52, 62);
       const l = car.length;
-      const top = car.y - l / 2;
 
       ctx.save();
       ctx.translate(x, car.y);
@@ -547,11 +576,11 @@ export class RoadScene {
       ctx.fill();
 
       // Body
-      const body = ctx.createLinearGradient(-w / 2, 0, w / 2, 0);
-      body.addColorStop(0, car.hue);
-      body.addColorStop(0.5, car.accent);
-      body.addColorStop(1, car.hue);
-      ctx.fillStyle = body;
+      const paint = ctx.createLinearGradient(-w / 2, 0, w / 2, 0);
+      paint.addColorStop(0, car.body);
+      paint.addColorStop(0.5, car.trim);
+      paint.addColorStop(1, car.body);
+      ctx.fillStyle = paint;
       roundRect(ctx, -w / 2, -l / 2, w, l, 12);
       ctx.fill();
 
@@ -589,7 +618,6 @@ export class RoadScene {
       }
 
       ctx.restore();
-      void top;
     }
 
     ctx.restore();

@@ -36,7 +36,7 @@
 .demo__bar-title img {
   width: 28px;
   height: 28px;
-  border-radius: 7px;
+  border-radius: var(--r-sm);
   object-fit: cover;
 }
 
@@ -81,12 +81,14 @@
 }
 
 /* ---------- Stage ---------- */
+/* Side by side with the panel the stage simply fills the row - declaring an
+   aspect ratio here would be a lie, since the panel is the taller track.
+   The stacked layouts below set a real ratio. */
 .stage {
   position: relative;
   min-width: 0;
-  background: #0d1016;
-  aspect-ratio: 16 / 9;
-  max-height: 560px;
+  min-height: 420px;
+  background: var(--surface-stage);
 }
 
 .stage__canvas {
@@ -220,7 +222,7 @@
   flex-direction: column;
   gap: 14px;
   padding: 16px;
-  background: #15161c;
+  background: var(--surface-panel);
   border-left: 1px solid var(--line);
 }
 
@@ -311,9 +313,8 @@
   margin: 0;
 }
 
-.stepper input:focus {
-  outline: none;
-}
+/* No `outline: none` here - the global :focus-visible ring is the only
+   indicator this text field has. */
 
 .quick-bets {
   display: grid;
@@ -390,6 +391,10 @@
   animation: cashout-pulse 1.6s ease-in-out infinite;
 }
 
+.panel__cta--cashout[aria-disabled='true'] {
+  animation: none;
+}
+
 .panel__cta--cashout:hover:not(:disabled) {
   background: #ffd071;
 }
@@ -402,12 +407,6 @@
   50% {
     box-shadow: 0 0 0 10px rgba(255, 194, 71, 0);
   }
-}
-
-.panel__secondary {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
 }
 
 .panel__stats {
@@ -462,7 +461,7 @@
   border-radius: var(--r-md);
   border: 1px dashed rgba(255, 194, 71, 0.35);
   background: rgba(255, 194, 71, 0.06);
-  color: #d6c9a9;
+  color: var(--text-warn);
   font-size: 11.5px;
   line-height: 1.55;
 }
@@ -481,7 +480,7 @@
   background: rgba(255, 194, 71, 0.05);
   font-size: 12px;
   line-height: 1.6;
-  color: #cbbfa4;
+  color: var(--text-warn);
 }
 
 .demo__legal strong {

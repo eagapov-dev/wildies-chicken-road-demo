@@ -4,7 +4,7 @@
 
 .hero__track {
   display: flex;
-  gap: 14px;
+  gap: var(--rail-gap);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
@@ -15,10 +15,11 @@
   display: none;
 }
 
-/* Two narrow slides + one wide slide fill the row, matching the reference. */
+/* Two narrow slides + one wide slide exactly fill the row, matching the
+   reference geometry of 280 + 280 + 680 inside a 1240px gap-less width. */
 .hero-slide {
   position: relative;
-  flex: 0 0 calc((100% - 2 * 14px) * 0.222);
+  flex: 0 0 calc((100% - 2 * var(--rail-gap)) * 280 / 1240);
   aspect-ratio: 280 / 225;
   border-radius: var(--r-lg);
   overflow: hidden;
@@ -29,7 +30,7 @@
 }
 
 .hero-slide--wide {
-  flex-basis: calc((100% - 2 * 14px) * 0.537);
+  flex-basis: calc((100% - 2 * var(--rail-gap)) * 680 / 1240);
   aspect-ratio: 680 / 225;
 }
 

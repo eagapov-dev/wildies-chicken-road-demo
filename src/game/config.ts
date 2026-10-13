@@ -4,18 +4,21 @@ export interface Difficulty {
   id: DifficultyId;
   label: string;
   /** Cumulative payout multiplier after crossing lane n (1-indexed). */
-  multipliers: number[];
+  multipliers: readonly number[];
   /** Cars per lane - cosmetic only, the demo never resolves a collision. */
   traffic: number;
 }
 
-export const DIFFICULTIES: Difficulty[] = [
-  {
-    id: 'easy',
-    label: 'Easy',
-    multipliers: [1.09, 1.21, 1.35, 1.52, 1.72, 1.97, 2.28, 2.68, 3.2],
-    traffic: 1,
-  },
+/** Also the fallback, so `getDifficulty` can return a definite value. */
+export const EASY: Difficulty = {
+  id: 'easy',
+  label: 'Easy',
+  multipliers: [1.09, 1.21, 1.35, 1.52, 1.72, 1.97, 2.28, 2.68, 3.2],
+  traffic: 1,
+};
+
+export const DIFFICULTIES: readonly Difficulty[] = [
+  EASY,
   {
     id: 'medium',
     label: 'Medium',
@@ -37,7 +40,7 @@ export const DIFFICULTIES: Difficulty[] = [
 ];
 
 export const getDifficulty = (id: DifficultyId): Difficulty =>
-  DIFFICULTIES.find((d) => d.id === id) ?? DIFFICULTIES[0];
+  DIFFICULTIES.find((d) => d.id === id) ?? EASY;
 
 /** Play-money starting balance. These are demo credits, never currency. */
 export const STARTING_BALANCE = 1000;
@@ -52,3 +55,9 @@ export const ROUNDS_FOR_BONUS = 2;
 
 /** Face value of the simulated bonus, in demo credits. */
 export const BONUS_CREDITS = 500;
+
+/** How long the finished board stays on screen before it is cleared. */
+export const SETTLE_DELAY_MS = 1500;
+
+/** Bonus pop-up delay. Must exceed SETTLE_DELAY_MS so the board settles first. */
+export const BONUS_DELAY_MS = 1900;
