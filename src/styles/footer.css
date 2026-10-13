@@ -1,0 +1,128 @@
+.footer {
+  margin-top: 40px;
+  border-top: 1px solid var(--line);
+  background: #0c0e10;
+}
+
+.footer__inner {
+  padding: 28px var(--gutter) 40px;
+  max-width: 1680px;
+}
+
+.logo-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 28px 40px;
+  padding: 22px 0;
+}
+
+.logo-strip + .logo-strip {
+  border-top: 1px solid var(--line);
+}
+
+.logo-strip img {
+  height: 26px;
+  max-width: 120px;
+  object-fit: contain;
+  opacity: 0.85;
+  transition: opacity 0.18s;
+}
+
+.logo-strip--payments img {
+  height: 24px;
+}
+
+.logo-strip img:hover {
+  opacity: 1;
+}
+
+.footer__brand {
+  display: grid;
+  place-items: center;
+  gap: 16px;
+  padding: 26px 0;
+}
+
+.footer__brand img {
+  height: 22px;
+}
+
+.footer__copy {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: auto repeat(3, minmax(0, 1fr)) minmax(0, 1fr);
+  gap: 28px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+}
+
+.footer__age {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--text-dim);
+  border-radius: var(--r-sm);
+  color: var(--text-dim);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.footer__col h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin-bottom: 12px;
+}
+
+.footer__col li + li {
+  margin-top: 8px;
+}
+
+.footer__col a {
+  font-size: 13px;
+  color: var(--text-dim);
+  transition: color 0.18s;
+}
+
+.footer__col a:hover {
+  color: var(--text);
+}
+
+.footer__social {
+  display: flex;
+  gap: 10px;
+}
+
+.footer__social img {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+  transition: opacity 0.18s;
+}
+
+.footer__social a:hover img {
+  opacity: 1;
+}
+
+/* Assessment disclaimer - this build is not the real operator site. */
+.footer__disclaimer {
+  margin-top: 28px;
+  padding: 16px 18px;
+  border: 1px dashed rgba(255, 194, 71, 0.4);
+  border-radius: var(--r-md);
+  background: rgba(255, 194, 71, 0.06);
+  color: #d6c9a9;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.footer__disclaimer strong {
+  color: var(--gold);
+}

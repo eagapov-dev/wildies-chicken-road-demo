@@ -1,0 +1,346 @@
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: var(--overlay);
+  backdrop-filter: blur(6px);
+  animation: modal-fade 0.22s var(--ease);
+}
+
+@keyframes modal-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.modal__panel {
+  position: relative;
+  width: min(760px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  border-radius: var(--r-xl);
+  background: var(--surface-3);
+  box-shadow: var(--shadow-pop);
+  animation: modal-rise 0.26s var(--ease);
+}
+
+@keyframes modal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+}
+
+.modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: background 0.18s;
+}
+
+.modal__close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ---------- Auth modal ---------- */
+.auth {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 460px;
+}
+
+.auth__aside {
+  position: relative;
+  padding: 28px;
+  background: linear-gradient(160deg, #221b45, #171821 65%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.auth__aside h3 {
+  font-size: 22px;
+  color: var(--purple-soft);
+  font-weight: 600;
+}
+
+.auth__aside strong {
+  font-size: 23px;
+  color: #fff;
+}
+
+.auth__aside img {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 68%;
+  object-fit: cover;
+  object-position: 58% 40%;
+  mask-image: linear-gradient(180deg, transparent, #000 22%);
+}
+
+.auth__aside h3,
+.auth__aside strong {
+  position: relative;
+  z-index: 1;
+}
+
+.auth__main {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth__tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 26px;
+}
+
+.auth__tab {
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-dim);
+  border-bottom: 2px solid var(--line);
+  transition: color 0.18s, border-color 0.18s;
+}
+
+.auth__tab.is-active {
+  color: var(--text-strong);
+  border-color: var(--purple);
+}
+
+.auth__field {
+  margin-bottom: 14px;
+}
+
+.auth__input {
+  width: 100%;
+  height: 48px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  background: var(--surface-4);
+  color: var(--text);
+  padding: 0 16px;
+  font-size: 15px;
+  transition: border-color 0.18s;
+}
+
+.auth__input::placeholder {
+  color: var(--text-faint);
+}
+
+.auth__input:focus {
+  outline: none;
+  border-color: var(--purple-soft);
+}
+
+.auth__row input[type='checkbox'] {
+  accent-color: var(--purple);
+  width: 16px;
+  height: 16px;
+}
+
+.auth__row label {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.auth__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 6px 0 18px;
+  font-size: 13.5px;
+  color: var(--text-dim);
+}
+
+.auth__link {
+  color: var(--purple-soft);
+  text-decoration: underline;
+}
+
+.auth__note {
+  margin-top: auto;
+  padding-top: 18px;
+  font-size: 12px;
+  color: var(--text-faint);
+  line-height: 1.6;
+}
+
+/* ---------- Bonus modal ---------- */
+.modal__panel.bonus-panel {
+  width: min(460px, 100%);
+}
+
+.modal__panel.auth-panel {
+  width: min(760px, 100%);
+}
+
+.bonus {
+  padding: 0;
+  text-align: center;
+}
+
+.bonus__hero {
+  position: relative;
+  padding: 38px 28px 26px;
+  background:
+    radial-gradient(130% 100% at 50% 0%, rgba(113, 91, 255, 0.55), transparent 72%),
+    linear-gradient(180deg, #2b2447, #26262f);
+  overflow: hidden;
+}
+
+.bonus__rays {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 150%;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(255, 194, 71, 0.1) 0deg 6deg,
+    transparent 6deg 24deg
+  );
+  mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.9) 6%, transparent 55%);
+  animation: bonus-spin 26s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes bonus-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.bonus__coin {
+  position: relative;
+  font-size: 58px;
+  line-height: 1;
+  animation: bonus-pop 0.5s var(--ease) both;
+}
+
+@keyframes bonus-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4) rotate(-20deg);
+  }
+}
+
+.bonus__tag {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 5px 12px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 194, 71, 0.16);
+  border: 1px solid rgba(255, 194, 71, 0.45);
+  color: var(--gold);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.bonus__title {
+  position: relative;
+  margin-top: 16px;
+  font-size: 28px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.bonus__sub {
+  position: relative;
+  margin-top: 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.bonus__body {
+  padding: 24px 28px 28px;
+  display: grid;
+  gap: 16px;
+}
+
+.bonus__amount {
+  display: grid;
+  gap: 2px;
+  padding: 16px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.bonus__amount b {
+  font-size: 26px;
+  color: var(--gold);
+  font-weight: 900;
+}
+
+.bonus__amount span {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.bonus__disclaimer {
+  font-size: 12px;
+  line-height: 1.65;
+  color: #d6c9a9;
+  background: rgba(255, 194, 71, 0.07);
+  border: 1px dashed rgba(255, 194, 71, 0.4);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.bonus__disclaimer strong {
+  color: var(--gold);
+}
+
+.bonus__actions {
+  display: grid;
+  gap: 10px;
+}
+
+.bonus__dismiss {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-decoration: underline;
+  justify-self: center;
+}
+
+.bonus__dismiss:hover {
+  color: var(--text);
+}
+
+/* Claimed state */
+.bonus__claimed {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: var(--r-md);
+  background: rgba(23, 178, 106, 0.12);
+  border: 1px solid rgba(23, 178, 106, 0.4);
+  color: #9ce9c4;
+  font-size: 13px;
+}

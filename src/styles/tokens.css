@@ -1,0 +1,61 @@
+/* Design tokens sampled from the reference site (wildies16.com) */
+:root {
+  /* Surfaces */
+  --bg: #101214;
+  --surface: #1c1e20;
+  --surface-2: #202028;
+  --surface-3: #26262f;
+  --surface-4: #2f2f3a;
+  --overlay: rgba(8, 9, 11, 0.82);
+
+  /* Text */
+  --text: #ececec;
+  --text-strong: #ffffff;
+  --text-dim: #949494;
+  --text-faint: #6c6f73;
+
+  /* Brand */
+  --purple: #715bff;
+  --purple-soft: #8d7cff;
+  --purple-deep: #4c3bd6;
+  --green: #17b26a;
+  --green-hover: #14a062;
+  --gold: #ffc247;
+  --red: #f04438;
+
+  /* Lines */
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.14);
+
+  /* Radii */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-pill: 999px;
+
+  /* Layout */
+  --sidebar-w: 190px;
+  --sidebar-w-collapsed: 68px;
+  --header-h: 68px;
+  --gutter: 28px;
+
+  /* Effects */
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 30px 80px rgba(0, 0, 0, 0.6);
+  --glow-purple: 0 0 0 1px rgba(141, 124, 255, 0.5), 0 0 28px rgba(113, 91, 255, 0.35);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@media (max-width: 1100px) {
+  :root {
+    --gutter: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --gutter: 14px;
+    --header-h: 60px;
+  }
+}

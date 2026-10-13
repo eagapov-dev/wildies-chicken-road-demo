@@ -1,0 +1,15 @@
+export const paymentLogos: Array<{ name: string; logo: string }> = [
+  { name: 'Ethereum', logo: 'payments/dogecoin-alt.svg' },
+  { name: 'Bitcoin Cash', logo: 'payments/bitcoin-cash.webp' },
+  { name: 'Apple Pay', logo: 'payments/apple-pay.svg' },
+  { name: 'Revolut', logo: 'payments/revolut.svg' },
+  { name: 'Tether', logo: 'payments/tether.webp' },
+  { name: 'Flexepin', logo: 'payments/flexepin.webp' },
+  { name: 'Voucher', logo: 'payments/voucher.webp' },
+  { name: 'Google Pay', logo: 'payments/google-pay.svg' },
+  { name: 'MuchBetter', logo: 'payments/muchbetter.webp' },
+  { name: 'Dogecoin', logo: 'payments/dogecoin.webp' },
+  { name: 'SafeCharge', logo: 'payments/safecharge.webp' },
+  { name: 'Visa', logo: 'payments/visa.webp' },
+  { name: 'Mastercard', logo: 'payments/mastercard.svg' },
+];

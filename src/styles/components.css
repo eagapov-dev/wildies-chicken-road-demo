@@ -1,0 +1,394 @@
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 24px;
+  border-radius: var(--r-lg);
+  border: 1px solid transparent;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background 0.18s, border-color 0.18s, transform 0.12s, box-shadow 0.18s, opacity 0.18s;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn--ghost {
+  border-color: var(--purple);
+  color: #f1efff;
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: rgba(113, 91, 255, 0.14);
+}
+
+.btn--primary {
+  background: var(--green);
+  color: #fff;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--green-hover);
+}
+
+.btn--purple {
+  background: var(--purple);
+  color: #fff;
+}
+
+.btn--purple:hover:not(:disabled) {
+  background: var(--purple-deep);
+}
+
+.btn--sm {
+  height: 32px;
+  padding: 0 16px;
+  font-size: 13px;
+  border-radius: var(--r-md);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  transition: background 0.18s, color 0.18s, opacity 0.18s;
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: var(--surface-4);
+  color: var(--text);
+}
+
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ---------- Category chips ---------- */
+.chips {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 18px 0 4px;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  height: 40px;
+  padding: 8px 14px;
+  border-radius: var(--r-lg);
+  border: 1px solid transparent;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  transition: background 0.18s, border-color 0.18s;
+}
+
+.chip:hover {
+  background: var(--surface-3);
+}
+
+.chip.is-active {
+  background: transparent;
+  border-color: var(--purple-soft);
+}
+
+.chip img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* ---------- Section header ---------- */
+.section {
+  margin-top: 26px;
+}
+
+.section__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.section__icon--thumb {
+  border-radius: 7px;
+  object-fit: cover;
+}
+
+.section__icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex: 0 0 26px;
+}
+
+.section__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-strong);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.section__tools {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-all {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--purple);
+  color: #f1efff;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.18s;
+}
+
+.view-all:hover {
+  background: rgba(113, 91, 255, 0.16);
+}
+
+/* ---------- Horizontal rails ---------- */
+.rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.rail::-webkit-scrollbar {
+  display: none;
+}
+
+.rail--6 {
+  grid-auto-columns: calc((100% - 5 * 14px) / 6);
+}
+
+.rail--providers {
+  grid-auto-columns: calc((100% - 5 * 14px) / 6);
+}
+
+/* ---------- Game card ---------- */
+.game-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 198 / 294;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--surface-2);
+  scroll-snap-align: start;
+  transition: transform 0.22s var(--ease), box-shadow 0.22s var(--ease);
+}
+
+.game-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card);
+}
+
+.game-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.game-card__overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  align-content: center;
+  background: linear-gradient(180deg, rgba(10, 10, 14, 0.25), rgba(10, 10, 14, 0.85));
+  opacity: 0;
+  transition: opacity 0.22s var(--ease);
+  padding: 12px;
+  text-align: center;
+}
+
+.game-card:hover .game-card__overlay,
+.game-card:focus-visible .game-card__overlay {
+  opacity: 1;
+}
+
+.game-card__name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.game-card__provider {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.game-card__badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  padding: 4px 9px;
+  border-radius: var(--r-pill);
+  background: var(--green);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 14px rgba(23, 178, 106, 0.45);
+}
+
+.game-card--demo {
+  box-shadow: 0 0 0 2px rgba(23, 178, 106, 0.55);
+}
+
+/* ---------- Provider tile ---------- */
+.provider-tile {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  aspect-ratio: 198 / 132;
+  padding: 14px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  scroll-snap-align: start;
+  transition: background 0.18s, transform 0.18s var(--ease);
+}
+
+.provider-tile:hover {
+  background: var(--surface-3);
+  transform: translateY(-3px);
+}
+
+.provider-tile img {
+  max-height: 34px;
+  max-width: 76%;
+  object-fit: contain;
+}
+
+.provider-tile span {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ---------- Sports tile ---------- */
+.sports-tile {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 16px 10px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  scroll-snap-align: start;
+  transition: background 0.18s, transform 0.18s var(--ease);
+}
+
+.sports-tile:hover {
+  background: var(--surface-3);
+  transform: translateY(-3px);
+}
+
+.sports-tile img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.sports-tile span {
+  font-size: 12.5px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.rail--sports {
+  grid-auto-columns: calc((100% - 10 * 12px) / 11);
+  gap: 12px;
+}
+
+/* ---------- Promo strip ---------- */
+.promo-strip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-top: 28px;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  min-height: 170px;
+  background: var(--surface-2);
+}
+
+.promo-strip img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.promo-strip__body {
+  position: relative;
+  z-index: 1;
+  padding: 26px 32px;
+  max-width: 60%;
+}
+
+.promo-strip__title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+}
+
+.promo-strip__line {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.86);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+}
+
+.promo-strip__cta {
+  margin-top: 16px;
+}

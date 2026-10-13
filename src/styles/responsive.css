@@ -1,0 +1,311 @@
+/* ===========================================================
+   Responsive rules - desktop first, matching the reference
+   shell down to a single-column mobile layout.
+   =========================================================== */
+
+@media (max-width: 1440px) {
+  .rail--6,
+  .rail--providers {
+    grid-auto-columns: calc((100% - 4 * 14px) / 5);
+  }
+}
+
+@media (max-width: 1240px) {
+  .rail--6,
+  .rail--providers {
+    grid-auto-columns: calc((100% - 3 * 14px) / 4);
+  }
+
+  .rail--sports {
+    grid-auto-columns: calc((100% - 6 * 12px) / 7);
+  }
+
+  .demo__body {
+    grid-template-columns: minmax(0, 1fr) 270px;
+  }
+}
+
+/* ---------- Tablet: sidebar collapses to an off-canvas drawer ---------- */
+@media (max-width: 1024px) {
+  .header__brand {
+    width: auto;
+    padding-left: var(--gutter);
+  }
+
+  .shell.is-collapsed .header__brand {
+    width: auto;
+  }
+
+  .sidebar {
+    width: 260px;
+    transform: translateX(-100%);
+    box-shadow: 24px 0 60px rgba(0, 0, 0, 0.6);
+  }
+
+  .shell.is-collapsed .sidebar {
+    width: 260px;
+  }
+
+  /* On small screens the toggle opens the drawer instead of collapsing it. */
+  .shell.is-drawer-open .sidebar {
+    transform: translateX(0);
+  }
+
+  .shell.is-collapsed .nav-item__label,
+  .shell.is-collapsed .nav-item__caret,
+  .shell.is-collapsed .sidebar__foot .select__label,
+  .shell.is-collapsed .sidebar__foot .pill-row__label {
+    display: block;
+  }
+
+  .shell.is-collapsed .nav-item {
+    justify-content: flex-start;
+    padding-inline: 16px;
+  }
+
+  .shell.is-collapsed .sidebar__social {
+    flex-direction: row;
+  }
+
+  .shell.is-collapsed .social-btn {
+    width: 46px;
+  }
+
+  .main,
+  .shell.is-collapsed .main {
+    padding-left: 0;
+  }
+
+  .sidebar__scrim {
+    display: block;
+    position: fixed;
+    inset: var(--header-h) 0 0 0;
+    z-index: 54;
+    background: rgba(6, 7, 9, 0.6);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s var(--ease);
+  }
+
+  .shell.is-drawer-open .sidebar__scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .hero-slide {
+    flex-basis: calc((100% - 2 * 14px) * 0.30);
+  }
+
+  .hero-slide--wide {
+    flex-basis: calc((100% - 2 * 14px) * 0.62);
+  }
+}
+
+@media (max-width: 920px) {
+  .rail--6,
+  .rail--providers {
+    grid-auto-columns: calc((100% - 3 * 14px) / 4);
+  }
+
+  .rail--sports {
+    grid-auto-columns: calc((100% - 4 * 12px) / 5);
+  }
+
+  /* Game: stage on top, controls underneath */
+  .demo__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panel {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .panel__notice {
+    margin-top: 0;
+  }
+
+  .stage {
+    aspect-ratio: 4 / 3;
+    max-height: none;
+  }
+
+  .auth {
+    grid-template-columns: 1fr;
+  }
+
+  .auth__aside {
+    display: none;
+  }
+
+  .footer__grid {
+    grid-template-columns: auto 1fr 1fr;
+    row-gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .search {
+    display: none;
+  }
+
+  .header__search-toggle {
+    display: grid;
+  }
+
+  .hero-slide,
+  .hero-slide--wide {
+    flex-basis: calc(100% - 44px);
+    aspect-ratio: 16 / 8;
+    min-height: 168px;
+  }
+
+  .hero-slide__body {
+    max-width: 72%;
+    padding: 18px 20px;
+  }
+
+  .section__title {
+    font-size: 17px;
+  }
+
+  .section__icon {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
+  }
+
+  .rail--6,
+  .rail--providers {
+    grid-auto-columns: calc((100% - 2 * 10px) / 3);
+    gap: 10px;
+  }
+
+  .rail--sports {
+    grid-auto-columns: calc((100% - 3 * 10px) / 4);
+    gap: 10px;
+  }
+
+  .promo-strip {
+    min-height: 150px;
+  }
+
+  .promo-strip__body {
+    max-width: 68%;
+    padding: 18px 20px;
+  }
+
+  .promo-strip__title {
+    font-size: 20px;
+  }
+
+  .promo-strip__line {
+    font-size: 12.5px;
+  }
+
+  .logo-strip {
+    gap: 20px 26px;
+  }
+
+  .logo-strip img {
+    height: 20px;
+    max-width: 92px;
+  }
+
+  .footer__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .demo__bar {
+    padding: 12px 14px;
+    gap: 8px;
+  }
+
+  .demo__bar-spacer {
+    flex-basis: 100%;
+    height: 0;
+  }
+
+  .tag {
+    padding: 4px 8px;
+    font-size: 9.5px;
+  }
+
+  .stage {
+    aspect-ratio: 5 / 4;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 560px) {
+  .header__actions .btn {
+    height: 36px;
+    padding: 0 14px;
+    font-size: 13.5px;
+  }
+
+  .header__logo {
+    height: 22px;
+  }
+
+  .rail--6,
+  .rail--providers {
+    grid-auto-columns: calc((100% - 10px) / 2.35);
+  }
+
+  .rail--sports {
+    grid-auto-columns: calc((100% - 2 * 10px) / 3.2);
+  }
+
+  .hero-slide,
+  .hero-slide--wide {
+    flex-basis: calc(100% - 26px);
+    aspect-ratio: 16 / 9;
+  }
+
+  .hero-slide__body {
+    max-width: 78%;
+  }
+
+  .stage {
+    aspect-ratio: 1 / 1;
+  }
+
+  .quick-bets {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .difficulty button {
+    font-size: 10.5px;
+  }
+
+  .bonus__title {
+    font-size: 23px;
+  }
+
+  .footer__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    padding: 12px;
+  }
+
+  .auth__main {
+    padding: 22px 18px;
+  }
+}
+
+@media (max-width: 400px) {
+  .promo-strip__body {
+    max-width: 80%;
+  }
+
+  .hud-pill b {
+    font-size: 15px;
+  }
+}

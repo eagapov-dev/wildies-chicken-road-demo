@@ -1,0 +1,489 @@
+/* ===========================================================
+   Chicken Road 2 - interactive demo
+   Simulated outcomes, demo credits only. No real money.
+   =========================================================== */
+
+.demo {
+  margin-top: 30px;
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}
+
+.demo__shell {
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, #1d1f28, #16171d);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.demo__bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.demo__bar-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.demo__bar-title img {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  object-fit: cover;
+}
+
+.demo__bar-provider {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: var(--r-pill);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tag--demo {
+  background: rgba(255, 194, 71, 0.14);
+  border: 1px solid rgba(255, 194, 71, 0.45);
+  color: var(--gold);
+}
+
+.tag--sim {
+  background: rgba(113, 91, 255, 0.16);
+  border: 1px solid rgba(141, 124, 255, 0.5);
+  color: #c5bbff;
+}
+
+.demo__bar-spacer {
+  flex: 1 1 auto;
+}
+
+.demo__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+}
+
+/* ---------- Stage ---------- */
+.stage {
+  position: relative;
+  min-width: 0;
+  background: #0d1016;
+  aspect-ratio: 16 / 9;
+  max-height: 560px;
+}
+
+.stage__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: manipulation;
+}
+
+.stage__hud {
+  position: absolute;
+  inset: 12px 12px auto;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.hud-pill {
+  display: grid;
+  gap: 1px;
+  padding: 7px 13px;
+  border-radius: var(--r-md);
+  background: rgba(10, 12, 16, 0.72);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hud-pill span {
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.hud-pill b {
+  font-size: 17px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  line-height: 1.15;
+}
+
+.hud-pill--mult b {
+  color: var(--gold);
+}
+
+.hud-pill--win b {
+  color: #4ade9a;
+}
+
+.stage__watermark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-18deg);
+  z-index: 1;
+  font-size: clamp(42px, 9vw, 110px);
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.045);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* Floating toast inside the stage (round result) */
+.stage__toast {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: var(--r-pill);
+  background: rgba(10, 12, 16, 0.86);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(74, 222, 154, 0.45);
+  color: #bdf3d8;
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  animation: toast-in 0.3s var(--ease);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+}
+
+/* Idle / start overlay */
+.stage__cover {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(8, 10, 14, 0.55), rgba(8, 10, 14, 0.88));
+  backdrop-filter: blur(2px);
+}
+
+.stage__cover h3 {
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 900;
+  color: #fff;
+}
+
+.stage__cover p {
+  max-width: 420px;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.6;
+}
+
+/* ---------- Control panel ---------- */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background: #15161c;
+  border-left: 1px solid var(--line);
+}
+
+.panel__block {
+  display: grid;
+  gap: 8px;
+}
+
+.panel__label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.balance {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.balance b {
+  font-size: 19px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+
+.balance em {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+}
+
+.stepper {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 38px;
+  align-items: center;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.stepper button {
+  height: 44px;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-dim);
+  transition: background 0.16s, color 0.16s;
+}
+
+.stepper button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+.stepper button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.stepper input {
+  height: 44px;
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.stepper input::-webkit-outer-spin-button,
+.stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.stepper input:focus {
+  outline: none;
+}
+
+.quick-bets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.quick-bets button {
+  height: 30px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  transition: background 0.16s, color 0.16s;
+}
+
+.quick-bets button:hover:not(:disabled) {
+  background: var(--surface-4);
+  color: #fff;
+}
+
+.quick-bets button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.difficulty {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.difficulty button {
+  height: 34px;
+  padding: 0 2px;
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  transition: background 0.16s, color 0.16s;
+}
+
+.difficulty button:hover:not(:disabled) {
+  color: #fff;
+}
+
+.difficulty button.is-active {
+  background: var(--purple);
+  color: #fff;
+}
+
+.difficulty button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.panel__cta {
+  height: 54px;
+  font-size: 16px;
+  font-weight: 800;
+  border-radius: var(--r-md);
+  letter-spacing: 0.01em;
+}
+
+.panel__cta--cashout {
+  background: var(--gold);
+  color: #241d08;
+  animation: cashout-pulse 1.6s ease-in-out infinite;
+}
+
+.panel__cta--cashout:hover:not(:disabled) {
+  background: #ffd071;
+}
+
+@keyframes cashout-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 194, 71, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(255, 194, 71, 0);
+  }
+}
+
+.panel__secondary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.panel__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.stat {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.stat span {
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.stat b {
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.rounds-dots {
+  display: flex;
+  gap: 5px;
+  margin-top: 3px;
+}
+
+.rounds-dots i {
+  width: 16px;
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.16);
+  transition: background 0.3s;
+}
+
+.rounds-dots i.is-on {
+  background: var(--gold);
+}
+
+.panel__notice {
+  margin-top: auto;
+  padding: 11px 12px;
+  border-radius: var(--r-md);
+  border: 1px dashed rgba(255, 194, 71, 0.35);
+  background: rgba(255, 194, 71, 0.06);
+  color: #d6c9a9;
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+.panel__notice strong {
+  color: var(--gold);
+}
+
+/* ---------- Disclosure strip under the game ---------- */
+.demo__legal {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 18px;
+  border-top: 1px solid var(--line);
+  background: rgba(255, 194, 71, 0.05);
+  font-size: 12px;
+  line-height: 1.6;
+  color: #cbbfa4;
+}
+
+.demo__legal strong {
+  color: var(--gold);
+}
