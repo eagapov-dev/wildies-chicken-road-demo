@@ -5,6 +5,9 @@ playable **Chicken Road 2** demonstration that visitors can try before registeri
 
 Built as a practical technical test. **It is not a live casino and not affiliated with the operator.**
 
+**Live demo → https://eagapov-dev.github.io/wildies-chicken-road-demo/**
+**Source → https://github.com/eagapov-dev/wildies-chicken-road-demo**
+
 ---
 
 ## ⚠️ Test-environment disclosure
@@ -39,6 +42,17 @@ No UI framework, no CSS framework, no runtime dependencies — the shipped bundl
 ~29 kB CSS** (≈17 kB + 7 kB gzipped).
 
 ---
+
+## What to look at first
+
+1. Open the live link — the lobby mirrors the reference layout (header, sidebar, hero carousel,
+   category chips, game rails, provider grid, promo strips, sports rail, footer).
+2. Scroll to **Try before you register**, or click the `DEMO`-badged **Chicken Road 2** tile in
+   Top Games, which jumps straight to it.
+3. Press **Start the demo → Play → Go** a couple of times, then **Cash out**.
+4. Repeat once. After the second completed round the **"You've won a bonus"** pop-up appears.
+5. Resize the window (or use device emulation) down to ~390px — the sidebar becomes a drawer and
+   the game stacks stage-over-controls.
 
 ## Running it
 
