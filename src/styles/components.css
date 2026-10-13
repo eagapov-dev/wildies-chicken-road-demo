@@ -152,6 +152,8 @@
 }
 
 .section__title {
+  flex: 0 1 auto;
+  min-width: 0;
   font-size: 20px;
   font-weight: 700;
   color: var(--text-strong);
@@ -161,6 +163,7 @@
 
 .section__tools {
   margin-left: auto;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -176,6 +179,7 @@
   color: #f1efff;
   font-size: 13px;
   font-weight: 600;
+  white-space: nowrap;
   transition: background 0.18s;
 }
 
@@ -315,37 +319,38 @@
 }
 
 /* ---------- Sports tile ---------- */
+/* The sports artwork is portrait key art, so these read as cards, not icons. */
 .sports-tile {
-  display: grid;
-  place-items: center;
-  gap: 8px;
-  padding: 16px 10px;
+  position: relative;
+  display: block;
+  aspect-ratio: 358 / 496;
   border-radius: var(--r-md);
+  overflow: hidden;
   background: var(--surface-2);
   scroll-snap-align: start;
-  transition: background 0.18s, transform 0.18s var(--ease);
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
 
 .sports-tile:hover {
-  background: var(--surface-3);
-  transform: translateY(-3px);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card);
 }
 
 .sports-tile img {
-  width: 34px;
-  height: 34px;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sports-tile span {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 26px 8px 10px;
+  background: linear-gradient(transparent, rgba(8, 9, 12, 0.88));
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 700;
+  color: #fff;
   text-align: center;
-}
-
-.rail--sports {
-  grid-auto-columns: calc((100% - 10 * 12px) / 11);
-  gap: 12px;
 }
 
 /* ---------- Promo strip ---------- */

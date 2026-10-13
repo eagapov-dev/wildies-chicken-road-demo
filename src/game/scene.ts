@@ -187,11 +187,17 @@ export class RoadScene {
   }
 
   private chickenY(): number {
-    return this.height * 0.64;
+    return this.height * (this.compact ? 0.7 : 0.64);
+  }
+
+  /** Narrow stages (phones) need a taller header band so the multiplier
+   *  signs clear the HUD pills that are overlaid on top of the canvas. */
+  private get compact(): boolean {
+    return this.width < 540;
   }
 
   private get roadTop(): number {
-    return this.height * 0.3;
+    return this.height * (this.compact ? 0.4 : 0.3);
   }
 
   private get roadBottom(): number {
@@ -200,7 +206,12 @@ export class RoadScene {
 
   /** Pavement strip between the multiplier signs and the asphalt. */
   private get vergeTop(): number {
-    return this.height * 0.23;
+    return this.height * (this.compact ? 0.33 : 0.23);
+  }
+
+  /** Vertical centre of the multiplier signs. */
+  private get plateY(): number {
+    return this.compact ? this.vergeTop * 0.62 : this.height * 0.13;
   }
 
   // -------------------------------------------------------------------- update
@@ -458,7 +469,7 @@ export class RoadScene {
 
   private drawPlates(): void {
     const { ctx } = this;
-    const y = this.height * 0.13;
+    const y = this.plateY;
     const reached = Math.floor(this.displayLane + 0.001);
 
     for (let i = 0; i < this.multipliers.length; i += 1) {

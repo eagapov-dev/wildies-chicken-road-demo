@@ -16,9 +16,6 @@
     grid-auto-columns: calc((100% - 3 * 14px) / 4);
   }
 
-  .rail--sports {
-    grid-auto-columns: calc((100% - 6 * 12px) / 7);
-  }
 
   .demo__body {
     grid-template-columns: minmax(0, 1fr) 270px;
@@ -108,9 +105,6 @@
     grid-auto-columns: calc((100% - 3 * 14px) / 4);
   }
 
-  .rail--sports {
-    grid-auto-columns: calc((100% - 4 * 12px) / 5);
-  }
 
   /* Game: stage on top, controls underneath */
   .demo__body {
@@ -178,14 +172,10 @@
 
   .rail--6,
   .rail--providers {
-    grid-auto-columns: calc((100% - 2 * 10px) / 3);
-    gap: 10px;
-  }
-
-  .rail--sports {
     grid-auto-columns: calc((100% - 3 * 10px) / 4);
     gap: 10px;
   }
+
 
   .promo-strip {
     min-height: 150px;
@@ -236,16 +226,64 @@
     aspect-ratio: 5 / 4;
   }
 
+  /* Compact HUD so the pills do not crowd the lane signs. */
+  .hud-pill {
+    padding: 5px 9px;
+  }
+
+  .hud-pill span {
+    font-size: 8.5px;
+  }
+
+  .hud-pill b {
+    font-size: 14px;
+  }
+
+  .stage__toast {
+    max-width: calc(100% - 24px);
+    white-space: normal;
+    text-align: center;
+    font-size: 12px;
+    padding: 8px 14px;
+    border-radius: var(--r-md);
+  }
+
   .panel {
     padding: 14px;
   }
 }
 
+@media (max-width: 680px) {
+  .rail--6,
+  .rail--providers {
+    grid-auto-columns: calc((100% - 2 * 10px) / 3);
+  }
+}
+
 @media (max-width: 560px) {
+  /* Arrows alone are enough on phones - the rails are swipeable. */
+  .view-all {
+    display: none;
+  }
+
+  .section__title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .header__actions .btn {
     height: 36px;
     padding: 0 14px;
     font-size: 13.5px;
+  }
+
+  .header__actions {
+    gap: 8px;
+  }
+
+  .header__brand {
+    gap: 8px;
   }
 
   .header__logo {
@@ -257,9 +295,6 @@
     grid-auto-columns: calc((100% - 10px) / 2.35);
   }
 
-  .rail--sports {
-    grid-auto-columns: calc((100% - 2 * 10px) / 3.2);
-  }
 
   .hero-slide,
   .hero-slide--wide {
@@ -301,6 +336,21 @@
 }
 
 @media (max-width: 400px) {
+  /* Keep the whole header row on screen on the smallest phones. */
+  .header__actions .btn {
+    padding: 0 11px;
+    font-size: 12.5px;
+  }
+
+  .header__toggle {
+    width: 30px;
+    height: 30px;
+  }
+
+  .header__logo {
+    height: 19px;
+  }
+
   .promo-strip__body {
     max-width: 80%;
   }

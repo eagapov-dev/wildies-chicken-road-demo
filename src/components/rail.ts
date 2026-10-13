@@ -104,7 +104,7 @@ export function providerTile(provider: Provider): HTMLElement {
 export function createSportsRail(): HTMLElement {
   const tiles = sportsTiles.map((tile) =>
     el('a', { class: 'sports-tile', href: '#', 'aria-label': tile.name }, [
-      img(asset(tile.icon), '', { width: 34, height: 34 }),
+      img(asset(tile.icon), '', { width: 358, height: 496 }),
       el('span', { text: tile.name }),
     ]),
   );
@@ -112,6 +112,5 @@ export function createSportsRail(): HTMLElement {
   return createRail(tiles, {
     title: 'Sports',
     icon: 'sections/sports.svg',
-    modifier: 'rail--sports',
   });
 }

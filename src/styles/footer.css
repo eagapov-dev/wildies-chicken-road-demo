@@ -82,10 +82,13 @@
 }
 
 .footer__col li + li {
-  margin-top: 8px;
+  margin-top: 2px;
 }
 
+/* Comfortable tap targets on touch screens. */
 .footer__col a {
+  display: inline-block;
+  padding: 5px 0;
   font-size: 13px;
   color: var(--text-dim);
   transition: color 0.18s;
@@ -97,7 +100,19 @@
 
 .footer__social {
   display: flex;
-  gap: 10px;
+  gap: 6px;
+}
+
+.footer__social a {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+}
+
+.footer__social a:hover {
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .footer__social img {

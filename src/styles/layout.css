@@ -20,10 +20,16 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-width: 0;
   width: var(--sidebar-w);
   padding-left: 16px;
   transition: width 0.25s var(--ease);
+}
+
+.header__logo-link {
+  min-width: 0;
+  display: flex;
 }
 
 .shell.is-collapsed .header__brand {
