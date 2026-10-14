@@ -54,19 +54,30 @@ No UI framework, no CSS framework, no runtime dependencies — the shipped bundl
 5. Resize the window (or use device emulation) down to ~390px — the sidebar becomes a drawer and
    the game stacks stage-over-controls.
 
-## Running it
+## Running it locally
+
+Requires **Node 20 or newer** (check with `node -v`). Nothing else: no database, no backend,
+no environment variables, no API keys — it is a fully static site.
 
 ```bash
+git clone https://github.com/eagapov-dev/wildies-chicken-road-demo.git
+cd wildies-chicken-road-demo
 npm install
-npm run dev        # http://localhost:5173
+npm run dev
 ```
 
-```bash
-npm run build      # type-check (tsc) + production build into dist/
-npm run preview    # serve the production build locally
-```
+Then open **http://localhost:5173**. If you received a ZIP instead, unpack it and start from
+`npm install`.
 
-Requires Node 20+.
+| Command | What it does |
+|---|---|
+| `npm run dev` | Dev server with hot reload on http://localhost:5173 |
+| `npm run build` | Type-checks with `tsc`, then builds to `dist/` |
+| `npm run preview` | Serves the built `dist/` locally, to check the production bundle |
+| `npm run typecheck` | Type-check only, no build |
+
+`npm run build` is what CI runs; it fails on any type error, so a green build means the
+TypeScript is clean.
 
 ---
 
